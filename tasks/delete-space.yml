@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: dgodd/cf-cli
+inputs:
+- name: cf-space
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    ./cf-space/login
+    cf delete-space -f `cat cf-space/name`
+
