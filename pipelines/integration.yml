@@ -1,0 +1,91 @@
+---
+resource_types:
+- name: cf-space-resource
+  type: docker-image
+  source:
+    repository: dgodd/cf-space-resource
+
+resources:
+- name: samples
+  type: git
+  source:
+    uri: https://github.com/SteelToeOSS/Samples.git
+    branch: dev
+- name: connectors
+  type: git
+  source:
+    uri: https://github.com/SteelToeOSS/Connectors.git
+    branch: dev
+- name: cf-space
+  type: cf-space-resource
+  source:
+    target: {{cf_target}}
+    username: {{cf_username}}
+    password: {{cf_password}}
+    organization: integration
+
+jobs:
+- name: postgres-efcore-linux
+  plan:
+  - get: connectors
+    trigger: true
+  - get: samples
+    path: Connectors/src/PostgreEFCore/
+    trigger: true
+  - put: cf-space
+  - task: push-app
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: dgodd/cf-cli
+      inputs:
+      - name: cf-space
+      - name: samples
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          ./cf-space/login
+          cd samples/Connectors/src/PostgreEFCore/
+          cf create-service WhaleDB public myPostgres
+          cf push -f manifest-linux.yml
+  - task: test-app
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: dgodd/cf-cli
+      inputs:
+      - name: cf-space
+      run:
+        path: bash
+        args:
+        - -exc
+        - |
+          ./cf-space/login
+          export URL=`cf app postgres-connector | grep '^urls: ' | cut -d ' ' -f 2`
+          if [[ `curl -k https://$URL/Home/PostgresData` == *"<h3>Key2="* ]]; then
+            echo "Found Key2"
+          else
+            exit 1
+          fi
+  - task: delete-space
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: dgodd/cf-cli
+      inputs:
+      - name: cf-space
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          ./cf-space/login
+          cf delete-space -f `cat cf-space/name`

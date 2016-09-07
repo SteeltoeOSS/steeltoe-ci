@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+set -eux -o pipefail
+
+payload=$TMPDIR/cf-space-resource-request
+cat > $payload <&0
+
+TARGET=`jq -r '.source.target' < $payload`
+USERNAME=`jq -r '.source.username' < $payload`
+PASSWORD=`jq -r '.source.password' < $payload`
+ORGANIZATION=`jq -r '.source.organization' < $payload`
+
+cf login -a $TARGET -u $USERNAME -p $PASSWORD --skip-ssl-validation -o dev -s dev
+
+SPACE=$(pwgen -1)
+cf create-space ${SPACE} -o $ORGANIZATION
+
+echo "{\"version\": {\"ref\":\"$SPACE\"},\"metadata\":[]}" >&3
