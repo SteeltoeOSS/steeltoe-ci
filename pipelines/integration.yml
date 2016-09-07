@@ -81,3 +81,55 @@ jobs:
           fi
   - task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
+
+- name: rabbit-linux
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: true
+  - get: samples
+    path: Connectors/src/Rabbit/
+    trigger: true
+  - put: cf-space
+  - task: push-app
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: dgodd/cf-cli
+      inputs:
+      - name: cf-space
+      - name: samples
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          ./cf-space/login
+          cd samples/Connectors/src/Rabbit/
+          cf create-service p-rabbitmq standard myRabbitService
+          cf push -f manifest.yml
+  - task: test-app
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: dgodd/cf-cli
+      inputs:
+      - name: cf-space
+      run:
+        path: bash
+        args:
+        - -exc
+        - |
+          ./cf-space/login
+          export URL=`cf app rabbit-demo | grep '^urls: ' | cut -d ' ' -f 2`
+          if [[ `curl -k https://$URL/` == *"<h3>Message="* ]]; then
+            echo "Found Message"
+          else
+            exit 1
+          fi
+  - task: delete-space
+    file: steeltoe-ci/tasks/delete-space.yml
