@@ -148,7 +148,8 @@ jobs:
         - |
           ./cf-space/login
           export URL=`cf app rabbit-demo | grep '^urls: ' | cut -d ' ' -f 2`
-          if [[ `curl -k https://$URL/` == *"<h3>Message="* ]]; then
+          curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+          if [[ `curl -k https://$URL/` == *"<h3>Message=Some exciting text"* ]]; then
             echo "Found Message"
           else
             exit 1
