@@ -30,7 +30,6 @@ resources:
     organization: integration
 
 jobs:
-- name: postgres-efcore-linux
 - name: cleanup
   plan:
   - task: remove-all-spaces
@@ -53,6 +52,7 @@ jobs:
           echo | cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o integration
           cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].entity.name' | xargs -n1 cf delete-space -f
 
+- name: postgres-efcore-linux-src
   plan:
   - get: steeltoe-ci
   - get: connectors
@@ -79,7 +79,7 @@ jobs:
           ./cf-space/login
           cd samples/Connectors/src/PostgreEFCore/
           cf create-service WhaleDB public myPostgres
-          cf push -f manifest-linux.yml
+          cf push -f manifest-linux-src.yml
   - task: test-app
     config:
       platform: linux
@@ -96,7 +96,7 @@ jobs:
         - |
           ./cf-space/login
           export URL=`cf app postgres-connector | grep '^urls: ' | cut -d ' ' -f 2`
-          if [[ `curl -k https://$URL/Home/PostgresData` == *"<h3>Key2="* ]]; then
+          if [[ `curl -k https://$URL/Home/PostgresData` == *"<h3>Key2=Test Data 2"* ]]; then
             echo "Found Key2"
           else
             exit 1
