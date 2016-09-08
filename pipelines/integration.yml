@@ -31,6 +31,28 @@ resources:
 
 jobs:
 - name: postgres-efcore-linux
+- name: cleanup
+  plan:
+  - task: remove-all-spaces
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: dgodd/cf-cli
+      params:
+        CF_TARGET: {{cf_target}}
+        CF_USERNAME: {{cf_username}}
+        CF_PASSWORD: {{cf_password}}
+        CF_ORGANIZATION: integration
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          echo | cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o integration
+          cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].entity.name' | xargs -n1 cf delete-space -f
+
   plan:
   - get: steeltoe-ci
   - get: connectors
