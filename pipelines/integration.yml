@@ -10,62 +10,61 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: dave
+    branch: master
 - name: samples-rabbit
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/Rabbit/
-    branch: dave
+    branch: dev
 - name: samples-postgresql
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/PostgreSql/
-    branch: dave
+    branch: dev
 - name: samples-mysql-ef6
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/MySqlEF6/
-    branch: dave
+    branch: dev
 - name: samples-caching
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Caching/src/RedisCloudFoundry/
-    branch: dave
+    branch: dev
 - name: samples-config
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Configuration/src/AspDotNetCore/SimpleCloudFoundry
-    branch: dave
+    branch: dev
 - name: samples-mysql
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/MySql/
-    branch: dave
+    branch: dev
 - name: samples-oauth
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/OAuth/
-    branch: dave
+    branch: dev
 - name: samples-postgresql-efcore
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/PostgreEFCore/
-    branch: dave
+    branch: dev
 - name: samples-redis
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/Redis/
-    branch: dave
-
+    branch: dev
 - name: connectors
   type: git
   source:
@@ -352,7 +351,7 @@ jobs:
     file: steeltoe-ci/tasks/test-app.yml
     params:
       URL_PATH: /Home/MySqlData
-      TEXT: <h3>Key1=Test Data 1 - TestContext
+      TEXT: <h3>Key1=Row1 Text
   - task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
@@ -373,7 +372,7 @@ jobs:
   - task: publish
     file: steeltoe-ci/tasks/publish.yml
     params:
-      SOURCE_DIR: samples/Connectors/src/MySql/
+      SOURCE_DIR: samples/Connectors/src/OAuth/
       MANIFEST_YAML: manifest-windows.yml
       FRAMEWORK: net451
       RUNTIME: win7-x64
@@ -457,7 +456,7 @@ jobs:
     file: steeltoe-ci/tasks/test-app.yml
     params:
       URL_PATH: /Home/CacheData
-      TEXT: <h4>FIXME THIS TEXT DOES NOT EXIST
+      TEXT: <h3>Key1=Key1Value
   - task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
