@@ -11,6 +11,3 @@ run:
   args:
   - -exc
   - |
-    ./cf-space/login
-    cf delete-space -f `cat cf-space/name`
-
