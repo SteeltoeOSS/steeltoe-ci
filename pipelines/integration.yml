@@ -134,48 +134,50 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: push-app
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: dgodd/cf-cli
-      inputs:
-      - name: cf-space
-      - name: samples
-      run:
-        path: sh
-        args:
-        - -exc
-        - |
-          ./cf-space/login
-          cd samples/Connectors/src/PostgreEFCore/
-          cf create-service WhaleDB public myPostgres
-          cf push -f manifest-linux-src.yml
-  - task: test-app
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: dgodd/cf-cli
-      inputs:
-      - name: cf-space
-      run:
-        path: bash
-        args:
-        - -exc
-        - |
-          ./cf-space/login
-          export URL=`cf app postgres-connector | grep '^urls: ' | cut -d ' ' -f 2`
-          curl -k https://$URL/Home/PostgresData || curl -k https://$URL/Home/PostgresData || curl -k https://$URL/Home/PostgresData
-          if [[ `curl -k https://$URL/Home/PostgresData` == *"<h3>Key2=Test Data 2"* ]]; then
-            echo "Found Key2"
-          else
-            exit 1
-          fi
-  - task: delete-space
+  - do:
+    - task: push-app
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/cf-cli
+        inputs:
+        - name: cf-space
+        - name: samples
+        run:
+          path: sh
+          args:
+          - -exc
+          - |
+            ./cf-space/login
+            cd samples/Connectors/src/PostgreEFCore/
+            cf create-service WhaleDB public myPostgres
+            cf push -f manifest-linux-src.yml
+    - task: test-app
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/cf-cli
+        inputs:
+        - name: cf-space
+        run:
+          path: bash
+          args:
+          - -exc
+          - |
+            ./cf-space/login
+            export URL=`cf app postgres-connector | grep '^urls: ' | cut -d ' ' -f 2`
+            curl -k https://$URL/Home/PostgresData || curl -k https://$URL/Home/PostgresData || curl -k https://$URL/Home/PostgresData
+            if [[ `curl -k https://$URL/Home/PostgresData` == *"<h3>Key2=Test Data 2"* ]]; then
+              echo "Found Key2"
+            else
+              exit 1
+            fi
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: postgres-windows
@@ -188,29 +190,31 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: WhaleDB public myPostgres
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/PostgreSql/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/PostgresData
-      TEXT: <h3>Key1=Row1 Text
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: WhaleDB public myPostgres
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/PostgreSql/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/PostgresData
+        TEXT: <h3>Key1=Row1 Text
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: rabbit-linux
@@ -223,30 +227,32 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-rabbitmq standard myRabbitService
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/Rabbit/
-      MANIFEST_YAML: manifest.yml
-      FRAMEWORK: netcoreapp1.0
-      RUNTIME: ubuntu.14.04-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: cflinuxfs2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
-      URL_PATH: /
-      TEXT: <h3>Message=Some exciting text
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-rabbitmq standard myRabbitService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/Rabbit/
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: ubuntu.14.04-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: cflinuxfs2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+        URL_PATH: /
+        TEXT: <h3>Message=Some exciting text
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: rabbit-windows
@@ -259,30 +265,32 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-rabbitmq standard myRabbitService
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/Rabbit/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
-      URL_PATH: /
-      TEXT: <h3>Message=Some exciting text
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-rabbitmq standard myRabbitService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/Rabbit/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+        URL_PATH: /
+        TEXT: <h3>Message=Some exciting text
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: mysql-windows
@@ -295,29 +303,31 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-mysql 512mb myMySqlService
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/MySql/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/MySqlData
-      TEXT: <h3>Key2=Row2 Text
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-mysql 512mb myMySqlService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/MySql/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/MySqlData
+        TEXT: <h3>Key2=Row2 Text
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: mysql-ef6-windows
@@ -330,29 +340,31 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-mysql 512mb myMySqlService
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/MySql/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/MySqlData
-      TEXT: <h3>Key1=Row1 Text
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-mysql 512mb myMySqlService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/MySql/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/MySqlData
+        TEXT: <h3>Key1=Row1 Text
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: oauth-net451-windows
@@ -365,29 +377,31 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/OAuth/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/OAuthOptions
-      TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/OAuth/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/OAuthOptions
+        TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: redis-net451-windows
@@ -400,29 +414,31 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-redis shared-vm myRedisService
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Connectors/src/Redis/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/CacheData
-      TEXT: <h3>Key1=Key1Value
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-redis shared-vm myRedisService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/Redis/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/CacheData
+        TEXT: <h3>Key1=Key1Value
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: caching-redis-net451-windows
@@ -435,29 +451,31 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-redis shared-vm myRedisService
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Caching/src/RedisCloudFoundry/
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-  - task: test-app
-    attempts: 3
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/CacheData
-      TEXT: <h3>Key1=Key1Value
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-redis shared-vm myRedisService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Caching/src/RedisCloudFoundry/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/CacheData
+        TEXT: <h3>Key1=Key1Value
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: config-netcore-windows
@@ -470,30 +488,32 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-      MANIFEST_YAML: manifest-windows.yml
-      FRAMEWORK: net451
-      RUNTIME: win7-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: windows2012R2
-      APPNAME: foo
-  - task: test-app
-    attempts: 20
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/ConfigServer
-      TEXT: <h4>Property info.description=Spring Cloud Samples
-  - task: delete-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+        APPNAME: foo
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/ConfigServer
+        TEXT: <h4>Property info.description=Spring Cloud Samples
+  ensure:
+    task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
 
 - name: config-netcore-linux
@@ -506,28 +526,30 @@ jobs:
     trigger: false
   - put: cf-space
     resource: pcfdev-space
-  - task: create-service
-    file: steeltoe-ci/tasks/create-service.yml
-    params:
-      CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
-  - task: publish
-    file: steeltoe-ci/tasks/publish.yml
-    params:
-      SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-      MANIFEST_YAML: manifest.yml
-      FRAMEWORK: netcoreapp1.0
-      RUNTIME: ubuntu.14.04-x64
-  - task: push-app
-    attempts: 2
-    file: steeltoe-ci/tasks/push-app.yml
-    params:
-      STACK: cflinuxfs2
-      APPNAME: foo
-  - task: test-app
-    attempts: 20
-    file: steeltoe-ci/tasks/test-app.yml
-    params:
-      URL_PATH: /Home/ConfigServer
-      TEXT: <h4>Property bar=spam
-  - task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: ubuntu.14.04-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: cflinuxfs2
+        APPNAME: foo
+    - task: test-app
+      attempts: 3
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/ConfigServer
+        TEXT: <h4>Property bar=spam
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
