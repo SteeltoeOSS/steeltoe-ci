@@ -82,15 +82,30 @@ groups:
   - name: misc
     jobs:
       - cleanup-pcfdev
-  - name: connector
+  - name: postgresql
+    jobs:
+      - postgres-efcore-linux
+      - postgres-efcore-windows
+      - postgres-efcore-net451
+      - postgres-linux
+      - postgres-windows
+      - postgres-net451
+  - name: mysql
     jobs:
       - mysql-windows
       - mysql-ef6-windows
-      - postgres-efcore-linux-src
-      - postgres-windows
+  - name: rabbit
+    jobs:
       - rabbit-linux
       - rabbit-windows
-      - oauth-net451-windows
+      - rabbit-net451
+  - name: oauth
+    jobs:
+      - oauth-linux
+      - oauth-windows
+      - oauth-net451
+  - name: redis
+    jobs:
       - redis-net451-windows
   - name: caching
     jobs:
@@ -124,7 +139,7 @@ jobs:
           set -x
           cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].entity.name' | xargs -n1 cf delete-space -f
 
-- name: postgres-efcore-linux-src
+- name: postgres-efcore-linux
   plan:
   - get: steeltoe-ci
   - get: connectors
@@ -135,52 +150,181 @@ jobs:
   - put: cf-space
     resource: pcfdev-space
   - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: WhaleDB public myPostgres
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: ubuntu.14.04-x64
     - task: push-app
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/cf-cli
-        inputs:
-        - name: cf-space
-        - name: samples
-        run:
-          path: sh
-          args:
-          - -exc
-          - |
-            ./cf-space/login
-            cd samples/Connectors/src/PostgreEFCore/
-            cf create-service WhaleDB public myPostgres
-            cf push -f manifest-linux-src.yml
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: cflinuxfs2
     - task: test-app
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/cf-cli
-        inputs:
-        - name: cf-space
-        run:
-          path: bash
-          args:
-          - -exc
-          - |
-            ./cf-space/login
-            export URL=`cf app postgres-connector | grep '^urls: ' | cut -d ' ' -f 2`
-            curl -k https://$URL/Home/PostgresData || curl -k https://$URL/Home/PostgresData || curl -k https://$URL/Home/PostgresData
-            if [[ `curl -k https://$URL/Home/PostgresData` == *"<h3>Key2=Test Data 2"* ]]; then
-              echo "Found Key2"
-            else
-              exit 1
-            fi
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/PostgresData
+        TEXT: <h3>Key2=Test Data 2
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+- name: postgres-efcore-windows
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-postgresql-efcore
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: WhaleDB public myPostgres
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/PostgresData
+        TEXT: <h3>Key2=Test Data 2
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+- name: postgres-efcore-net451
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-postgresql-efcore
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: WhaleDB public myPostgres
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: net451
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/PostgresData
+        TEXT: <h3>Key2=Test Data 2
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+- name: postgres-linux
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-postgresql
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: WhaleDB public myPostgres
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/PostgreSql/
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: ubuntu.14.04-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: cflinuxfs2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/PostgresData
+        TEXT: <h3>Key1=Row1 Text
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: postgres-windows
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-postgresql
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: WhaleDB public myPostgres
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/PostgreSql/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/PostgresData
+        TEXT: <h3>Key1=Row1 Text
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+- name: postgres-net451
   plan:
   - get: steeltoe-ci
   - get: connectors
@@ -208,14 +352,14 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key1=Row1 Text
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: rabbit-linux
   plan:
@@ -245,7 +389,7 @@ jobs:
       params:
         STACK: cflinuxfs2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
@@ -275,6 +419,44 @@ jobs:
       params:
         SOURCE_DIR: samples/Connectors/src/Rabbit/
         MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+        URL_PATH: /
+        TEXT: <h3>Message=Some exciting text
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+- name: rabbit-net451
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-rabbit
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-rabbitmq standard myRabbitService
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/Rabbit/
+        MANIFEST_YAML: manifest-windows.yml
         FRAMEWORK: net451
         RUNTIME: win7-x64
     - task: push-app
@@ -283,7 +465,7 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
@@ -321,7 +503,7 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/MySqlData
@@ -358,7 +540,7 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/MySqlData
@@ -367,7 +549,82 @@ jobs:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
 
-- name: oauth-net451-windows
+- name: oauth-linux
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-oauth
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/OAuth/
+        MANIFEST_YAML: manifest.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: ubuntu.14.04-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: cflinuxfs2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/OAuthOptions
+        TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+
+- name: oauth-windows
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-oauth
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+    - task: publish
+      file: steeltoe-ci/tasks/publish.yml
+      params:
+        SOURCE_DIR: samples/Connectors/src/OAuth/
+        MANIFEST_YAML: manifest-windows.yml
+        FRAMEWORK: netcoreapp1.0
+        RUNTIME: win7-x64
+    - task: push-app
+      attempts: 2
+      file: steeltoe-ci/tasks/push-app.yml
+      params:
+        STACK: windows2012R2
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        URL_PATH: /Home/OAuthOptions
+        TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+
+- name: oauth-net451
   plan:
   - get: steeltoe-ci
   - get: connectors
@@ -395,7 +652,7 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/OAuthOptions
@@ -432,7 +689,7 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/CacheData
@@ -469,7 +726,7 @@ jobs:
       params:
         STACK: windows2012R2
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/CacheData
@@ -507,7 +764,7 @@ jobs:
         STACK: windows2012R2
         APPNAME: foo
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/ConfigServer
@@ -545,7 +802,7 @@ jobs:
         STACK: cflinuxfs2
         APPNAME: foo
     - task: test-app
-      attempts: 3
+      attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/ConfigServer
