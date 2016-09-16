@@ -6,6 +6,6 @@ image_resource:
     repository: dgodd/cf-cli
 inputs:
 - name: steeltoe-ci
-- name: cf-push
+- name: cf-space
 run:
   path: steeltoe-ci/scripts/delete-space.sh
