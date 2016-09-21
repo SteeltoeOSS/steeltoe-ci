@@ -10,5 +10,6 @@ fi
 if [[ `curl -k https://${URL}${URL_PATH}` == *"${TEXT}"* ]]; then
   echo "Found $TEXT"
 else
+  sleep 10
   exit 1
 fi
