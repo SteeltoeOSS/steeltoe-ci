@@ -195,7 +195,7 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-        MANIFEST_YAML: manifest.yml
+        MANIFEST_YAML: manifest-windows.yml
         FRAMEWORK: netcoreapp1.0
         RUNTIME: win7-x64
     - task: push-app
@@ -232,7 +232,7 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-        MANIFEST_YAML: manifest.yml
+        MANIFEST_YAML: manifest-windows.yml
         FRAMEWORK: net451
         RUNTIME: win7-x64
     - task: push-app
