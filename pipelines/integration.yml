@@ -114,6 +114,9 @@ groups:
     jobs:
       - config-netcore-windows
       - config-netcore-linux
+  - name: security
+    jobs:
+      - security-linux
 
 jobs:
 - name: cleanup-pcfdev
@@ -810,3 +813,92 @@ jobs:
     ensure:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
+
+- name: security-linux
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-config
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+    - aggregate:
+      - do:
+        - task: publish-signon
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_signon}
+          params:
+            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: ubuntu.14.04-x64
+        - task: push-signon
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_signon}
+          params:
+            STACK: cflinuxfs2
+            APPNAME: singlesignon
+      - do:
+        - task: publish-jwtauth
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_jwtauth}
+          params:
+            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: ubuntu.14.04-x64
+        - task: push-jwtauth
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_jwtauth}
+          params:
+            STACK: cflinuxfs2
+            APPNAME: jwtauth
+    - task: setup-uaa
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ruby
+        inputs:
+        - name: cf-space
+        - name: cf-push
+        outputs:
+        - name: cf-app-login
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
+            gem install cf-uaac
+            ./cf-space/login
+            export APP_URL=`cat cf-push/url`
+            export SPACE=`cat cf-space/name`
+            uaac target uaa.pcfdev.shoetree.io --skip-ssl-validation
+            uaac token client get admin -s admin-client-secret
+            uaac contexts
+            uaac group add testgroup || true
+            uaac user add user_${SPACE} --given_name Integration --family_name Test --emails test@testcloud.com --password Password1!
+            uaac member add testgroup user_${SPACE}
+            uaac client add ${SPACE}TestApp --name ${SPACE}TestApp --scope cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --authorized_grant_types authorization_code,refresh_token --authorities uaa.resource --redirect_uri http://${APP_URL}/signin-cloudfoundry --autoapprove cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --secret ${SPACE}TestApp
+            echo "{\"username\":\"user_${SPACE}\",\"password\":\"Password1!\"}" > cf-app-login/login.json
+    - task: test-app
+      attempts: 5
+      file: steeltoe-ci/tasks/test-app.yml
+      params:
+        PRECOND: ""
+        URL_PATH: /Home/ConfigServer
+        TEXT: <h4>Property bar=spam
+    # ensure:
+      # task: delete-space
+      # file: steeltoe-ci/tasks/delete-space.yml
