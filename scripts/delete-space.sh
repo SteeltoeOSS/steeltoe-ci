@@ -9,9 +9,3 @@ cf services | sed '1,4d' | cut -d ' ' -f 1 | xargs -n1 cf purge-service-instance
 # Delete space
 export SPACE=`cat cf-space/name`
 cf delete-space -f $SPACE
-
-# Delete domain
-export DOMAIN=`cf domains | grep $SPACE | cut -d ' ' -f 1`
-if [-n $DOMAIN]; then
-  cf delete-domain $DOMAIN -f
-fi

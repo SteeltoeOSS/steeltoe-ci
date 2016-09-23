@@ -10,7 +10,7 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: master
+    branch: dgodd
 - name: samples-rabbit
   type: git
   source:
@@ -825,10 +825,38 @@ jobs:
   - put: cf-space
     resource: pcfdev-space
   - do:
+    - task: setup-uaa
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ruby
+        inputs:
+        - name: cf-space
+        outputs:
+        - name: cf-app-login
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
+            gem install cf-uaac
+            ./cf-space/login
+            export SPACE=`cat cf-space/name`
+            uaac target uaa.pcfdev.shoetree.io --skip-ssl-validation
+            uaac token client get admin -s admin-client-secret
+            uaac contexts
+            uaac group add testgroup || true
+            uaac user add user${SPACE} --given_name Integration --family_name Test --emails test@testcloud.com --password Password1!
+            uaac member add testgroup user${SPACE}
+            uaac client add ${SPACE}TestApp --name ${SPACE}TestApp --scope cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --authorized_grant_types authorization_code,refresh_token --authorities uaa.resource --redirect_uri http://single-signon-${SPACE}.pcfdev.shoetree.io/signin-cloudfoundry --autoapprove cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --secret ${SPACE}TestApp
+            echo "{\"username\":\"user${SPACE}\",\"password\":\"Password1!\"}" > cf-app-login/login.json
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -845,7 +873,7 @@ jobs:
           input_mapping: {publish: publish_signon}
           params:
             STACK: cflinuxfs2
-            APPNAME: singlesignon
+            APPNAME: single-signon
       - do:
         - task: publish-jwtauth
           file: steeltoe-ci/tasks/publish.yml
@@ -862,7 +890,8 @@ jobs:
           params:
             STACK: cflinuxfs2
             APPNAME: jwtauth
-    - task: setup-uaa
+    - task: test-app
+      attempts: 5
       config:
         platform: linux
         image_resource:
@@ -870,35 +899,17 @@ jobs:
           source:
             repository: ruby
         inputs:
+        - name: steeltoe-ci
         - name: cf-space
-        - name: cf-push
-        outputs:
-        - name: cf-app-login
         run:
           path: sh
           args:
           - -euxc
           - |
-            curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
-            gem install cf-uaac
-            ./cf-space/login
-            export APP_URL=`cat cf-push/url`
             export SPACE=`cat cf-space/name`
-            uaac target uaa.pcfdev.shoetree.io --skip-ssl-validation
-            uaac token client get admin -s admin-client-secret
-            uaac contexts
-            uaac group add testgroup || true
-            uaac user add user_${SPACE} --given_name Integration --family_name Test --emails test@testcloud.com --password Password1!
-            uaac member add testgroup user_${SPACE}
-            uaac client add ${SPACE}TestApp --name ${SPACE}TestApp --scope cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --authorized_grant_types authorization_code,refresh_token --authorities uaa.resource --redirect_uri http://${APP_URL}/signin-cloudfoundry --autoapprove cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --secret ${SPACE}TestApp
-            echo "{\"username\":\"user_${SPACE}\",\"password\":\"Password1!\"}" > cf-app-login/login.json
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        PRECOND: ""
-        URL_PATH: /Home/ConfigServer
-        TEXT: <h4>Property bar=spam
-    # ensure:
-      # task: delete-space
-      # file: steeltoe-ci/tasks/delete-space.yml
+            gem install mechanize
+            ./steeltoe-ci/scripts/test-security.rb
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
+      ### FIXME Also remove uaac client etc.... (from above)

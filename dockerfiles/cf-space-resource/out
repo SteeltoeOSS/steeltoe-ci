@@ -13,10 +13,7 @@ ORGANIZATION=`jq -r '.source.organization' < $payload`
 
 cf login -a $TARGET -u $USERNAME -p $PASSWORD --skip-ssl-validation -o dev -s dev
 
-SPACE=$(pwgen -1)
+SPACE=$(pwgen -1 | awk '{print tolower($0)}')
 cf create-space ${SPACE} -o $ORGANIZATION
-
-DOMAIN=$(cf domains | grep shared | cut -d ' ' -f 1)
-cf create-domain $ORGANIZATION ${SPACE}.$DOMAIN
 
 echo "{\"version\": {\"ref\":\"$SPACE\"},\"metadata\":[]}" >&3
