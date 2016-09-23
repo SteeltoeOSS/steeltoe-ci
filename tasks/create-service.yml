@@ -13,9 +13,11 @@ run:
   - -exc
   - |
     ./cf-space/login
+    export SPACE=`cat cf-space/name`
     if [ ! -z "$CREATE_SERVICE" ]; then
       cf create-service $CREATE_SERVICE
     fi
     if [ ! -z "$CREATE_CUPS" ]; then
+      export CREATE_CUPS=$(echo $CREATE_CUPS | sed "s/\${SPACE}/$SPACE/")
       cf cups $CREATE_CUPS
     fi

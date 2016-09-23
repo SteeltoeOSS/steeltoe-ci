@@ -828,7 +828,7 @@ jobs:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
     - aggregate:
       - do:
         - task: publish-signon
