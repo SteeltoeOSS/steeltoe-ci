@@ -18,5 +18,5 @@ run:
       cf create-service $CREATE_SERVICE
     fi
     if [ ! -z "$CREATE_CUPS" ]; then
-      cf cups $(echo $CREATE_CUPS | sed "s/\${SPACE}/$SPACE/")
+      cf cups $(echo $CREATE_CUPS | sed "s/\${SPACE}/$SPACE/g")
     fi

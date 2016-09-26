@@ -10,7 +10,7 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: dgodd
+    branch: master
 - name: samples-rabbit
   type: git
   source:
@@ -64,6 +64,12 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Connectors/src/Redis/
+    branch: dev
+- name: samples-security
+  type: git
+  source:
+    uri: https://github.com/SteelToeOSS/Samples.git
+    path: Security/src
     branch: dev
 - name: connectors
   type: git
@@ -820,39 +826,13 @@ jobs:
   - get: connectors
     trigger: false
   - get: samples
-    resource: samples-config
+    resource: samples-security
     trigger: false
   - put: cf-space
     resource: pcfdev-space
   - do:
     - task: setup-uaa
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: ruby
-        inputs:
-        - name: cf-space
-        outputs:
-        - name: cf-app-login
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
-            gem install cf-uaac
-            ./cf-space/login
-            export SPACE=`cat cf-space/name`
-            uaac target uaa.pcfdev.shoetree.io --skip-ssl-validation
-            uaac token client get admin -s admin-client-secret
-            uaac contexts
-            uaac group add testgroup || true
-            uaac user add user${SPACE} --given_name Integration --family_name Test --emails test@testcloud.com --password Password1!
-            uaac member add testgroup user${SPACE}
-            uaac client add ${SPACE}TestApp --name ${SPACE}TestApp --scope cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --authorized_grant_types authorization_code,refresh_token --authorities uaa.resource --redirect_uri http://single-signon-${SPACE}.pcfdev.shoetree.io/signin-cloudfoundry --autoapprove cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --secret ${SPACE}TestApp
-            echo "{\"username\":\"user${SPACE}\",\"password\":\"Password1!\"}" > cf-app-login/login.json
+      file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -910,6 +890,8 @@ jobs:
             gem install mechanize
             ./steeltoe-ci/scripts/test-security.rb
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-      ### FIXME Also remove uaac client etc.... (from above)
+      do:
+        - task: teardown-uaa
+          file: steeltoe-ci/tasks/teardown-uaa.yml
+        - task: delete-space
+          file: steeltoe-ci/tasks/delete-space.yml

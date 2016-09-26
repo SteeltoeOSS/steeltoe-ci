@@ -1,0 +1,23 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: ruby
+inputs:
+- name: cf-space
+outputs:
+- name: cf-app-login
+run:
+  path: sh
+  args:
+  - -euxc
+  - |
+    curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
+    gem install cf-uaac
+    ./cf-space/login
+    export SPACE=`cat cf-space/name`
+    uaac target uaa.pcfdev.shoetree.io --skip-ssl-validation
+    uaac token client get admin -s admin-client-secret
+    uaac contexts
+    uaac user delete user${SPACE}
