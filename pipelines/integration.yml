@@ -10,7 +10,7 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: master
+    branch: ci-music
 - name: samples-rabbit
   type: git
   source:
@@ -71,6 +71,12 @@ resources:
     uri: https://github.com/SteelToeOSS/Samples.git
     path: Security/src
     branch: dev
+- name: samples-music-store
+  type: git
+  source:
+    uri: https://github.com/SteelToeOSS/Samples.git
+    path: MusicStore/src
+    branch: ci-music
 - name: connectors
   type: git
   source:
@@ -88,6 +94,11 @@ groups:
   - name: misc
     jobs:
       - cleanup-pcfdev
+  - name: music-store
+    jobs:
+      - music-store-linux
+      - music-store-windows
+      - music-store-net451
   - name: postgresql
     jobs:
       - postgres-efcore-linux
@@ -1094,3 +1105,345 @@ jobs:
           file: steeltoe-ci/tasks/teardown-uaa.yml
         - task: delete-space
           file: steeltoe-ci/tasks/delete-space.yml
+
+- name: music-store-linux
+  plan:
+  - get: steeltoe-ci
+  - get: samples
+    resource: samples-music-store
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-cloudfoundry-services
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/cf-cli
+        inputs:
+        - name: cf-space
+        - name: samples
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            ./cf-space/login
+            cd samples/MusicStore
+            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/WhaleDB public/' | sh
+    - aggregate:
+      - do:
+        - task: publish-MusicStoreService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_musicstoreservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: ubuntu.14.04-x64
+        - task: push-MusicStoreService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_musicstoreservice}
+          params:
+            STACK: cflinuxfs2
+            APPNAME: musicstore
+      - do:
+        - task: publish-MusicStoreUI
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_musicstoreui}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: ubuntu.14.04-x64
+        - task: push-MusicStoreUI
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_musicstoreui}
+          params:
+            STACK: cflinuxfs2
+            APPNAME: musicui
+      - do:
+        - task: publish-OrderService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_orderservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/OrderService
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: ubuntu.14.04-x64
+        - task: push-OrderService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_orderservice}
+          params:
+            STACK: cflinuxfs2
+            APPNAME: orderprocessing
+      - do:
+        - task: publish-ShoppingCartService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_shoppingcartservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: ubuntu.14.04-x64
+        - task: push-ShoppingCartService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_shoppingcartservice}
+          params:
+            STACK: cflinuxfs2
+            APPNAME: shoppingcart
+    - task: test-app
+      attempts: 5
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/ruby
+        inputs:
+        - name: steeltoe-ci
+        - name: cf-space
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            export SPACE=`cat cf-space/name`
+            ./steeltoe-ci/scripts/test-musicstore.rb
+  ensure:
+    task: delete-space
+    file: steeltoe-ci/tasks/delete-space.yml
+
+- name: music-store-windows
+  plan:
+  - get: steeltoe-ci
+  - get: samples
+    resource: samples-music-store
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-cloudfoundry-services
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/cf-cli
+        inputs:
+        - name: cf-space
+        - name: samples
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            ./cf-space/login
+            cd samples/MusicStore
+            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/WhaleDB public/' | sh
+    - aggregate:
+      - do:
+        - task: publish-MusicStoreService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_musicstoreservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-MusicStoreService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_musicstoreservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: musicstore
+      - do:
+        - task: publish-MusicStoreUI
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_musicstoreui}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-MusicStoreUI
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_musicstoreui}
+          params:
+            STACK: windows2012R2
+            APPNAME: musicui
+      - do:
+        - task: publish-OrderService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_orderservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/OrderService
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-OrderService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_orderservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: orderprocessing
+      - do:
+        - task: publish-ShoppingCartService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_shoppingcartservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-ShoppingCartService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_shoppingcartservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: shoppingcart
+    - task: test-app
+      attempts: 5
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/ruby
+        inputs:
+        - name: steeltoe-ci
+        - name: cf-space
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            export SPACE=`cat cf-space/name`
+            ./steeltoe-ci/scripts/test-musicstore.rb
+  # ensure:
+    # task: delete-space
+    # file: steeltoe-ci/tasks/delete-space.yml
+
+- name: music-store-net451
+  plan:
+  - get: steeltoe-ci
+  - get: samples
+    resource: samples-music-store
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-cloudfoundry-services
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/cf-cli
+        inputs:
+        - name: cf-space
+        - name: samples
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            ./cf-space/login
+            cd samples/MusicStore
+            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/p-mysql 512mb/' | sh
+    - aggregate:
+      - do:
+        - task: publish-MusicStoreService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_musicstoreservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-MusicStoreService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_musicstoreservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: musicstore
+      - do:
+        - task: publish-MusicStoreUI
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_musicstoreui}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-MusicStoreUI
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_musicstoreui}
+          params:
+            STACK: windows2012R2
+            APPNAME: musicui
+      - do:
+        - task: publish-OrderService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_orderservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/OrderService
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-OrderService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_orderservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: orderprocessing
+      - do:
+        - task: publish-ShoppingCartService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_shoppingcartservice}
+          params:
+            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-ShoppingCartService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_shoppingcartservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: shoppingcart
+    - task: test-app
+      attempts: 5
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/ruby
+        inputs:
+        - name: steeltoe-ci
+        - name: cf-space
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            export SPACE=`cat cf-space/name`
+            ./steeltoe-ci/scripts/test-musicstore.rb
+  # ensure:
+    # task: delete-space
+    # file: steeltoe-ci/tasks/delete-space.yml
