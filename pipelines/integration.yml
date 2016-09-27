@@ -123,6 +123,8 @@ groups:
   - name: security
     jobs:
       - security-linux
+      - security-windows
+      - security-net451
 
 jobs:
 - name: cleanup-pcfdev
@@ -877,7 +879,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: ruby
+            repository: dgodd/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
@@ -887,7 +889,156 @@ jobs:
           - -euxc
           - |
             export SPACE=`cat cf-space/name`
-            gem install mechanize
+            ./steeltoe-ci/scripts/test-security.rb
+    ensure:
+      do:
+        - task: teardown-uaa
+          file: steeltoe-ci/tasks/teardown-uaa.yml
+        - task: delete-space
+          file: steeltoe-ci/tasks/delete-space.yml
+
+- name: security-windows
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-security
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: setup-uaa
+      file: steeltoe-ci/tasks/setup-uaa.yml
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+    - aggregate:
+      - do:
+        - task: publish-signon
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_signon}
+          params:
+            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-signon
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_signon}
+          params:
+            STACK: windows2012R2
+            APPNAME: single-signon
+      - do:
+        - task: publish-jwtauth
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_jwtauth}
+          params:
+            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-jwtauth
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_jwtauth}
+          params:
+            STACK: windows2012R2
+            APPNAME: jwtauth
+    - task: test-app
+      attempts: 5
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/ruby
+        inputs:
+        - name: steeltoe-ci
+        - name: cf-space
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            export SPACE=`cat cf-space/name`
+            ./steeltoe-ci/scripts/test-security.rb
+    ensure:
+      do:
+        - task: teardown-uaa
+          file: steeltoe-ci/tasks/teardown-uaa.yml
+        - task: delete-space
+          file: steeltoe-ci/tasks/delete-space.yml
+
+- name: security-net451
+  plan:
+  - get: steeltoe-ci
+  - get: connectors
+    trigger: false
+  - get: samples
+    resource: samples-security
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: setup-uaa
+      file: steeltoe-ci/tasks/setup-uaa.yml
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+    - aggregate:
+      - do:
+        - task: publish-signon
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_signon}
+          params:
+            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-signon
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_signon}
+          params:
+            STACK: windows2012R2
+            APPNAME: single-signon
+      - do:
+        - task: publish-jwtauth
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_jwtauth}
+          params:
+            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-jwtauth
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_jwtauth}
+          params:
+            STACK: windows2012R2
+            APPNAME: jwtauth
+    - task: test-app
+      attempts: 5
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: dgodd/ruby
+        inputs:
+        - name: steeltoe-ci
+        - name: cf-space
+        run:
+          path: sh
+          args:
+          - -euxc
+          - |
+            export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-security.rb
     ensure:
       do:
