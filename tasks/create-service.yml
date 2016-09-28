@@ -20,3 +20,11 @@ run:
     if [ ! -z "$CREATE_CUPS" ]; then
       cf cups $(echo $CREATE_CUPS | sed "s/\${SPACE}/$SPACE/g")
     fi
+
+    set +x
+    while [ `cf services | grep 'in progress' | wc -l | sed 's/ //g'` != 0 ]; do
+      echo 'Waiting for services to start'
+      cf services | grep 'in progress'
+      echo
+      sleep 5
+    done
