@@ -161,15 +161,19 @@ jobs:
           cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o system -s system
           set -x
 
-          export SPACES=`cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].entity.name'`
-          if [ -n "$SPACES" ]; then
-            echo $SPACES | xargs -n1 cf delete-space -f
-          fi
+          echo "Remove all integration spaces"
+          export SPACES=`cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].metadata.guid'`
+          for space in $SPACES; do
+            echo $space
+            cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
+          done
 
-          export APPS=`cf curl '/v2/organizations?q=name%3Ap-spring-cloud-services&inline-relations-depth=2' | jq -r '.resources[].entity.spaces[].entity|select(.name|contains("instances"))|.apps[].entity.name'`
-          if [ -n "$APPS" ]; then
-            echo $APPS | xargs -n1 cf delete -f
-          fi
+          echo "Remove all spring cloud service instances"
+          export APPS=`cf curl '/v2/organizations?q=name%3Ap-spring-cloud-services&inline-relations-depth=2' | jq -r '.resources[].entity.spaces[].entity|select(.name|contains("instances"))|.apps[].metadata.guid'`
+          for app in $APPS; do
+            echo $app
+            cf curl -X DELETE "/v2/apps/$app?async=true&recursive=true"
+          done
 
 - name: postgres-efcore-linux
   plan:
