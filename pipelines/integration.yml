@@ -147,9 +147,18 @@ jobs:
         args:
         - -ec
         - |
-          echo | cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o integration
+          cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o system -s system
           set -x
-          cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].entity.name' | xargs -n1 cf delete-space -f
+
+          export SPACES=`cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].entity.name'`
+          if [ -n "$SPACES" ]; then
+            echo $SPACES | xargs -n1 cf delete-space -f
+          fi
+
+          export APPS=`cf curl '/v2/organizations?q=name%3Ap-spring-cloud-services&inline-relations-depth=2' | jq -r '.resources[].entity.spaces[].entity|select(.name|contains("instances"))|.apps[].entity.name'`
+          if [ -n "$APPS" ]; then
+            echo $APPS | xargs -n1 cf delete -f
+          fi
 
 - name: postgres-efcore-linux
   plan:
