@@ -35,3 +35,5 @@ run:
       echo
       exit 1
     fi
+
+    cf services
