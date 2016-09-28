@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
-set -ex
+set -eux
 
 ./cf-space/login
-
-# Delete all apps in space
-cf apps | sed '1,4d' | cut -d ' ' -f 1 | xargs -n1 cf delete -f
-
-# Delete all services in space
-cf services | sed '1,4d' | cut -d ' ' -f 1 | xargs -n1 cf delete-service -f
-
-# Purge all services in space
-cf services | sed '1,4d' | cut -d ' ' -f 1 | xargs -n1 cf purge-service-instance -f
-
-# Delete space
 export SPACE=`cat cf-space/name`
+export DATA=`cf curl "/v2/spaces?q=name%3A${SPACE}&inline-relations-depth=2" | jq '.resources[].entity|{apps:.apps|map(.entity.name), services:.service_instances|map(.entity.name)}'`
+
+for app in `echo $DATA | jq -r '.apps[]'`; do
+  cf delete -f $app
+done
+
+for service in `echo $DATA | jq -r '.services[]'`; do
+  cf delete-service -f $service
+done
+
+for service in `echo $DATA | jq -r '.services[]'`; do
+  cf purge-service-instance -f $service | true
+done
+
 cf delete-space -f $SPACE
