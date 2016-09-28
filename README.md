@@ -32,4 +32,7 @@ wget  misty-sisters.surge.sh/garden.zip
 
 Install the https certificate on linux and windows since it is self signed
 
+### Useful commands
 
+* To find all of the apps on a CF instance (after logging in as admin):
+  `cf curl '/v2/apps?inline-relations-depth=2' | jq -r '.resources[].entity|{org:.space.entity.organization.entity.name, space:.space.entity.name, name:.name}'`
