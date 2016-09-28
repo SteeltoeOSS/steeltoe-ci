@@ -3,7 +3,10 @@ set -ex
 
 ./cf-space/login
 
-# Deleet all services in space
+# Delete all apps in space
+cf apps | sed '1,4d' | cut -d ' ' -f 1 | xargs -n1 cf delete -f
+
+# Delete all services in space
 cf services | sed '1,4d' | cut -d ' ' -f 1 | xargs -n1 cf delete-service -f
 
 # Purge all services in space
