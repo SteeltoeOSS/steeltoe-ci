@@ -861,12 +861,12 @@ jobs:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNet4/SimpleCloudFoundry/config-server.json
+        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Configuration/src/AspDotNet4/SimpleCloudFoundry
-        MANIFEST_YAML: manifest.yml
+        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
+        MANIFEST_YAML: manifest-windows.yml
         FRAMEWORK: net451
         RUNTIME: win7-x64
     - task: push-app
