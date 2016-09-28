@@ -29,7 +29,7 @@ run:
       sleep 5
     done
 
-    if [ `cf services | grep 'create failed' | wc -l | sed 's/ //g'` > 0 ]; do
+    if [ `cf services | grep 'create failed' | wc -l | sed 's/ //g'` > 0 ]; then
       echo 'Some services failed to start'
       cf services
       echo
