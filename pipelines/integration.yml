@@ -1507,23 +1507,10 @@ jobs:
             STACK: cflinuxfs2
             APPNAME: fortuneui
     - task: test-app
+      file: steeltoe-ci/tasks/test-with-ruby.yml
+      params:
+        FILENAME: discovery
       attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-discovery.rb
   ensure:
     task: delete-space
     file: steeltoe-ci/tasks/delete-space.yml
