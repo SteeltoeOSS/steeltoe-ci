@@ -1192,9 +1192,9 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-musicstore.rb
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: music-store-windows
   plan:
@@ -1306,9 +1306,9 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-musicstore.rb
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: music-store-net451
   plan:
@@ -1420,9 +1420,9 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-musicstore.rb
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: discovery-linux
   plan:
@@ -1474,9 +1474,9 @@ jobs:
       params:
         FILENAME: discovery
       attempts: 5
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: discovery-windows
   plan:
@@ -1528,9 +1528,9 @@ jobs:
       params:
         FILENAME: discovery
       attempts: 5
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: discovery-net451
   plan:
@@ -1582,6 +1582,6 @@ jobs:
       params:
         FILENAME: discovery
       attempts: 5
-  ensure:
-    task: delete-space
-    file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
