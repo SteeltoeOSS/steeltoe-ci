@@ -146,6 +146,8 @@ groups:
   - name: discovery
     jobs:
       - discovery-linux
+      - discovery-windows
+      - discovery-net451
 
 jobs:
 - name: cleanup-pcfdev
@@ -1505,6 +1507,114 @@ jobs:
           input_mapping: {publish: publish_fortunetellerui}
           params:
             STACK: cflinuxfs2
+            APPNAME: fortuneui
+    - task: test-app
+      file: steeltoe-ci/tasks/test-with-ruby.yml
+      params:
+        FILENAME: discovery
+      attempts: 5
+  ensure:
+    task: delete-space
+    file: steeltoe-ci/tasks/delete-space.yml
+
+- name: discovery-windows
+  plan:
+  - get: steeltoe-ci
+  - get: samples
+    resource: samples-discovery
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-service-registry standard myDiscoveryService
+    - aggregate:
+      - do:
+        - task: publish-FortuneTellerService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_fortunetellerservice}
+          params:
+            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-FortuneTellerService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_fortunetellerservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: fortuneService
+        - task: publish-FortuneTellerUI
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_fortunetellerui}
+          params:
+            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+            MANIFEST_YAML: manifest.yml
+            FRAMEWORK: netcoreapp1.0
+            RUNTIME: win7-x64
+        - task: push-FortuneTellerUI
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_fortunetellerui}
+          params:
+            STACK: windows2012R2
+            APPNAME: fortuneui
+    - task: test-app
+      file: steeltoe-ci/tasks/test-with-ruby.yml
+      params:
+        FILENAME: discovery
+      attempts: 5
+  ensure:
+    task: delete-space
+    file: steeltoe-ci/tasks/delete-space.yml
+
+- name: discovery-net451
+  plan:
+  - get: steeltoe-ci
+  - get: samples
+    resource: samples-discovery
+    trigger: false
+  - put: cf-space
+    resource: pcfdev-space
+  - do:
+    - task: create-service
+      file: steeltoe-ci/tasks/create-service.yml
+      params:
+        CREATE_SERVICE: p-service-registry standard myDiscoveryService
+    - aggregate:
+      - do:
+        - task: publish-FortuneTellerService
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_fortunetellerservice}
+          params:
+            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-FortuneTellerService
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_fortunetellerservice}
+          params:
+            STACK: windows2012R2
+            APPNAME: fortuneService
+        - task: publish-FortuneTellerUI
+          file: steeltoe-ci/tasks/publish.yml
+          output_mapping: {publish: publish_fortunetellerui}
+          params:
+            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+            MANIFEST_YAML: manifest-windows.yml
+            FRAMEWORK: net451
+            RUNTIME: win7-x64
+        - task: push-FortuneTellerUI
+          attempts: 2
+          file: steeltoe-ci/tasks/push-app.yml
+          input_mapping: {publish: publish_fortunetellerui}
+          params:
+            STACK: windows2012R2
             APPNAME: fortuneui
     - task: test-app
       file: steeltoe-ci/tasks/test-with-ruby.yml
