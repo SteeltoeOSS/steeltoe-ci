@@ -7,7 +7,7 @@ Config files for Steeltoe CI, (https://ci.shoetree.io).
 Change the files, then:
 
 ```bash
-fly -t shoetree set-pipeline -l <(lpass show --notes 'Shared-Steeltoe/concourse.yml') -p integration -c pipelines/integration.yml
+./update.sh
 ```
 
 ## Creating docker images
