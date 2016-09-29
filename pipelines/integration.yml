@@ -1515,7 +1515,7 @@ jobs:
           output_mapping: {publish: publish_fortunetellerui}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-            MANIFEST_YAML: manifest.yml
+            MANIFEST_YAML: manifest-windows.yml
             FRAMEWORK: netcoreapp1.0
             RUNTIME: win7-x64
         - task: push-FortuneTellerUI
