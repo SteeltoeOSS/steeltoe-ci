@@ -15,7 +15,7 @@ run:
   - -exc
   - |
     ./cf-space/login
+    . ./cf-space/variables
     export APPNAME=${APPNAME:-testapp}
-    export SPACE=`cat cf-space/name`
-    cf push $APPNAME -s $STACK -f publish/manifest.yml -p publish --hostname $APPNAME-$SPACE
+    cf push $APPNAME -s $STACK -f publish/$MANIFEST_YAML -p publish --hostname $APPNAME-$SPACE
     cf app $APPNAME | grep '^urls: ' | cut -d ' ' -f 2 > cf-push/url

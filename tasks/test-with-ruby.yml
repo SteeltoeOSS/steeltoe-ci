@@ -12,5 +12,5 @@ run:
   args:
   - -euxc
   - |
-    export SPACE=`cat cf-space/name`
+    . ./cf-space/variables
     ./steeltoe-ci/scripts/test-$FILENAME.rb

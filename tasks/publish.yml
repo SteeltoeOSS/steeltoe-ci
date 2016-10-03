@@ -6,6 +6,7 @@ image_resource:
     repository: dgodd/dotnet
 inputs:
 - name: samples
+- name: cf-space
 outputs:
 - name: publish
 run:
@@ -13,8 +14,9 @@ run:
   args:
   - -exc
   - |
+    . ./cf-space/variables
     export PUBLISH_DIR=$PWD/publish
+    cp $SOURCE_DIR/$MANIFEST_YAML $PUBLISH_DIR/
     cd $SOURCE_DIR
-    cp $MANIFEST_YAML $PUBLISH_DIR/manifest.yml
     dotnet restore
     dotnet publish --output $PUBLISH_DIR --configuration Release --framework $FRAMEWORK --runtime $RUNTIME

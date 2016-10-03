@@ -100,13 +100,30 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Connectors.git
     branch: dev
-- name: pcfdev-space
+- name: pcfdev-linux
   type: cf-space-resource
   source:
     target: {{pcfdev2_target}}
     username: {{pcfdev2_username}}
     password: {{pcfdev2_password}}
     organization: integration
+    TYPE: LINUX
+- name: pcfdev-windows
+  type: cf-space-resource
+  source:
+    target: {{pcfdev2_target}}
+    username: {{pcfdev2_username}}
+    password: {{pcfdev2_password}}
+    organization: integration
+    TYPE: WINDOWS
+- name: pcfdev-net451
+  type: cf-space-resource
+  source:
+    target: {{pcfdev2_target}}
+    username: {{pcfdev2_username}}
+    password: {{pcfdev2_password}}
+    organization: integration
+    TYPE: NET451
 
 groups:
   - name: music-store
@@ -168,7 +185,7 @@ jobs:
     resource: samples-postgresql-efcore
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -178,14 +195,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-        MANIFEST_YAML: manifest.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: ubuntu.14.04-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: cflinuxfs2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -205,7 +217,7 @@ jobs:
     resource: samples-postgresql-efcore
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -215,14 +227,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -242,7 +249,7 @@ jobs:
     resource: samples-postgresql-efcore
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -252,14 +259,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -279,7 +281,7 @@ jobs:
     resource: samples-postgresql
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -289,14 +291,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreSql/
-        MANIFEST_YAML: manifest.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: ubuntu.14.04-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: cflinuxfs2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -316,7 +313,7 @@ jobs:
     resource: samples-postgresql
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -326,14 +323,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreSql/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -353,7 +345,7 @@ jobs:
     resource: samples-postgresql
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -363,14 +355,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/PostgreSql/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -390,7 +377,7 @@ jobs:
     resource: samples-rabbit
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -400,14 +387,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/Rabbit/
-        MANIFEST_YAML: manifest.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: ubuntu.14.04-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: cflinuxfs2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -428,7 +410,7 @@ jobs:
     resource: samples-rabbit
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -438,14 +420,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/Rabbit/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -466,7 +443,7 @@ jobs:
     resource: samples-rabbit
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -476,14 +453,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/Rabbit/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -504,7 +476,7 @@ jobs:
     resource: samples-mysql
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -514,14 +486,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/MySql/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -541,7 +508,7 @@ jobs:
     resource: samples-mysql-ef6
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -551,14 +518,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/MySql/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -578,7 +540,7 @@ jobs:
     resource: samples-oauth
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -588,14 +550,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/OAuth/
-        MANIFEST_YAML: manifest.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: ubuntu.14.04-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: cflinuxfs2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -616,7 +573,7 @@ jobs:
     resource: samples-oauth
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -626,14 +583,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/OAuth/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -653,7 +605,7 @@ jobs:
     resource: samples-oauth
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -663,14 +615,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/OAuth/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -690,7 +637,7 @@ jobs:
     resource: samples-redis
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -700,14 +647,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Connectors/src/Redis/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -727,7 +669,7 @@ jobs:
     resource: samples-caching
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -737,14 +679,9 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Caching/src/RedisCloudFoundry/
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
-      params:
-        STACK: windows2012R2
     - task: test-app
       attempts: 5
       file: steeltoe-ci/tasks/test-app.yml
@@ -764,7 +701,7 @@ jobs:
     resource: samples-config
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -774,14 +711,10 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
       params:
-        STACK: windows2012R2
         APPNAME: foo
     - task: test-app
       attempts: 5
@@ -802,7 +735,7 @@ jobs:
     resource: samples-config
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -812,14 +745,10 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-        MANIFEST_YAML: manifest.yml
-        FRAMEWORK: netcoreapp1.0
-        RUNTIME: ubuntu.14.04-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
       params:
-        STACK: cflinuxfs2
         APPNAME: foo
     - task: test-app
       attempts: 5
@@ -840,7 +769,7 @@ jobs:
     resource: samples-config
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -850,14 +779,10 @@ jobs:
       file: steeltoe-ci/tasks/publish.yml
       params:
         SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-        MANIFEST_YAML: manifest-windows.yml
-        FRAMEWORK: net451
-        RUNTIME: win7-x64
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
       params:
-        STACK: windows2012R2
         APPNAME: foo
     - task: test-app
       attempts: 5
@@ -878,7 +803,7 @@ jobs:
     resource: samples-security
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
@@ -893,15 +818,11 @@ jobs:
           output_mapping: {publish: publish_signon}
           params:
             SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-signon
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_signon}
           params:
-            STACK: cflinuxfs2
             APPNAME: single-signon
       - do:
         - task: publish-jwtauth
@@ -953,7 +874,7 @@ jobs:
     resource: samples-security
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
@@ -968,15 +889,11 @@ jobs:
           output_mapping: {publish: publish_signon}
           params:
             SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-signon
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_signon}
           params:
-            STACK: windows2012R2
             APPNAME: single-signon
       - do:
         - task: publish-jwtauth
@@ -1028,7 +945,7 @@ jobs:
     resource: samples-security
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
@@ -1043,15 +960,11 @@ jobs:
           output_mapping: {publish: publish_signon}
           params:
             SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-signon
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_signon}
           params:
-            STACK: windows2012R2
             APPNAME: single-signon
       - do:
         - task: publish-jwtauth
@@ -1101,7 +1014,7 @@ jobs:
     resource: samples-music-store
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-cloudfoundry-services
       config:
@@ -1128,15 +1041,11 @@ jobs:
           output_mapping: {publish: publish_musicstoreservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/MusicStoreService
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-MusicStoreService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_musicstoreservice}
           params:
-            STACK: cflinuxfs2
             APPNAME: musicstore
       - do:
         - task: publish-MusicStoreUI
@@ -1144,15 +1053,11 @@ jobs:
           output_mapping: {publish: publish_musicstoreui}
           params:
             SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-MusicStoreUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_musicstoreui}
           params:
-            STACK: cflinuxfs2
             APPNAME: musicui
       - do:
         - task: publish-OrderService
@@ -1160,15 +1065,11 @@ jobs:
           output_mapping: {publish: publish_orderservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/OrderService
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-OrderService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_orderservice}
           params:
-            STACK: cflinuxfs2
             APPNAME: orderprocessing
       - do:
         - task: publish-ShoppingCartService
@@ -1176,15 +1077,11 @@ jobs:
           output_mapping: {publish: publish_shoppingcartservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-ShoppingCartService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_shoppingcartservice}
           params:
-            STACK: cflinuxfs2
             APPNAME: shoppingcart
     - task: test-app
       attempts: 5
@@ -1215,7 +1112,7 @@ jobs:
     resource: samples-music-store
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-cloudfoundry-services
       config:
@@ -1242,15 +1139,11 @@ jobs:
           output_mapping: {publish: publish_musicstoreservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/MusicStoreService
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-MusicStoreService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_musicstoreservice}
           params:
-            STACK: windows2012R2
             APPNAME: musicstore
       - do:
         - task: publish-MusicStoreUI
@@ -1258,15 +1151,11 @@ jobs:
           output_mapping: {publish: publish_musicstoreui}
           params:
             SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-MusicStoreUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_musicstoreui}
           params:
-            STACK: windows2012R2
             APPNAME: musicui
       - do:
         - task: publish-OrderService
@@ -1274,15 +1163,11 @@ jobs:
           output_mapping: {publish: publish_orderservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/OrderService
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-OrderService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_orderservice}
           params:
-            STACK: windows2012R2
             APPNAME: orderprocessing
       - do:
         - task: publish-ShoppingCartService
@@ -1290,15 +1175,11 @@ jobs:
           output_mapping: {publish: publish_shoppingcartservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-ShoppingCartService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_shoppingcartservice}
           params:
-            STACK: windows2012R2
             APPNAME: shoppingcart
     - task: test-app
       attempts: 5
@@ -1329,7 +1210,7 @@ jobs:
     resource: samples-music-store
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-cloudfoundry-services
       config:
@@ -1356,15 +1237,11 @@ jobs:
           output_mapping: {publish: publish_musicstoreservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/MusicStoreService
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-MusicStoreService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_musicstoreservice}
           params:
-            STACK: windows2012R2
             APPNAME: musicstore
       - do:
         - task: publish-MusicStoreUI
@@ -1372,15 +1249,11 @@ jobs:
           output_mapping: {publish: publish_musicstoreui}
           params:
             SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-MusicStoreUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_musicstoreui}
           params:
-            STACK: windows2012R2
             APPNAME: musicui
       - do:
         - task: publish-OrderService
@@ -1388,15 +1261,11 @@ jobs:
           output_mapping: {publish: publish_orderservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/OrderService
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-OrderService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_orderservice}
           params:
-            STACK: windows2012R2
             APPNAME: orderprocessing
       - do:
         - task: publish-ShoppingCartService
@@ -1404,15 +1273,11 @@ jobs:
           output_mapping: {publish: publish_shoppingcartservice}
           params:
             SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-ShoppingCartService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_shoppingcartservice}
           params:
-            STACK: windows2012R2
             APPNAME: shoppingcart
     - task: test-app
       attempts: 5
@@ -1443,7 +1308,7 @@ jobs:
     resource: samples-discovery
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -1456,15 +1321,11 @@ jobs:
           output_mapping: {publish: publish_fortunetellerservice}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-FortuneTellerService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_fortunetellerservice}
           params:
-            STACK: cflinuxfs2
             APPNAME: fortuneService
       - do:
         - task: publish-FortuneTellerUI
@@ -1472,15 +1333,11 @@ jobs:
           output_mapping: {publish: publish_fortunetellerui}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
         - task: push-FortuneTellerUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_fortunetellerui}
           params:
-            STACK: cflinuxfs2
             APPNAME: fortuneui
     - task: test-app
       file: steeltoe-ci/tasks/test-with-ruby.yml
@@ -1498,7 +1355,7 @@ jobs:
     resource: samples-discovery
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -1511,15 +1368,11 @@ jobs:
           output_mapping: {publish: publish_fortunetellerservice}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-FortuneTellerService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_fortunetellerservice}
           params:
-            STACK: windows2012R2
             APPNAME: fortuneService
       - do:
         - task: publish-FortuneTellerUI
@@ -1527,15 +1380,11 @@ jobs:
           output_mapping: {publish: publish_fortunetellerui}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
         - task: push-FortuneTellerUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_fortunetellerui}
           params:
-            STACK: windows2012R2
             APPNAME: fortuneui
     - task: test-app
       file: steeltoe-ci/tasks/test-with-ruby.yml
@@ -1553,7 +1402,7 @@ jobs:
     resource: samples-discovery
     trigger: false
   - put: cf-space
-    resource: pcfdev-space
+    resource: pcfdev-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -1566,15 +1415,11 @@ jobs:
           output_mapping: {publish: publish_fortunetellerservice}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-FortuneTellerService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_fortunetellerservice}
           params:
-            STACK: windows2012R2
             APPNAME: fortuneService
       - do:
         - task: publish-FortuneTellerUI
@@ -1582,15 +1427,11 @@ jobs:
           output_mapping: {publish: publish_fortunetellerui}
           params:
             SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
         - task: push-FortuneTellerUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
           input_mapping: {publish: publish_fortunetellerui}
           params:
-            STACK: windows2012R2
             APPNAME: fortuneui
     - task: test-app
       file: steeltoe-ci/tasks/test-with-ruby.yml
