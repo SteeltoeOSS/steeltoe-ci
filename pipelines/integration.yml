@@ -15,73 +15,85 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/Rabbit/
+    paths:
+    - Connectors/src/Rabbit/
     branch: dev
 - name: samples-postgresql
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/PostgreSql/
+    paths:
+    - Connectors/src/PostgreSql/
     branch: dev
 - name: samples-mysql-ef6
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/MySqlEF6/
+    paths:
+    - Connectors/src/MySqlEF6/
     branch: dev
 - name: samples-caching
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Caching/src/RedisCloudFoundry/
+    paths:
+    - Caching/src/RedisCloudFoundry/
     branch: dev
 - name: samples-config
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Configuration/src/AspDotNetCore/SimpleCloudFoundry
+    paths:
+    - Configuration/src/AspDotNetCore/SimpleCloudFoundry
     branch: dev
 - name: samples-mysql
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/MySql/
+    paths:
+    - Connectors/src/MySql/
     branch: dev
 - name: samples-oauth
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/OAuth/
+    paths:
+    - Connectors/src/OAuth/
     branch: dev
 - name: samples-postgresql-efcore
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/PostgreEFCore/
+    paths:
+    - Connectors/src/PostgreEFCore/
     branch: dev
 - name: samples-redis
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Connectors/src/Redis/
+    paths:
+    - Connectors/src/Redis/
     branch: dev
 - name: samples-security
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Security/src
+    paths:
+    - Security/src
     branch: dev
 - name: samples-music-store
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: MusicStore/src
+    paths:
+    - MusicStore/src
     branch: dev
 - name: samples-discovery
   type: git
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
-    path: Discovery/src
+    paths:
+    - Discovery/src
     branch: dev
 - name: connectors
   type: git
