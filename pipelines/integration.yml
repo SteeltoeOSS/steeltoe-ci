@@ -100,29 +100,29 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Connectors.git
     branch: dev
-- name: pcfdev-linux
+- name: pez-linux
   type: cf-space-resource
   source:
-    target: {{pcfdev2_target}}
-    username: {{pcfdev2_username}}
-    password: {{pcfdev2_password}}
-    organization: integration
+    target: {{pez_target}}
+    username: {{pez_username}}
+    password: {{pez_password}}
+    organization: {{pez_org}}
     TYPE: LINUX
-- name: pcfdev-windows
+- name: pez-windows
   type: cf-space-resource
   source:
-    target: {{pcfdev2_target}}
-    username: {{pcfdev2_username}}
-    password: {{pcfdev2_password}}
-    organization: integration
+    target: {{pez_target}}
+    username: {{pez_username}}
+    password: {{pez_password}}
+    organization: {{pez_org}}
     TYPE: WINDOWS
-- name: pcfdev-net451
+- name: pez-net451
   type: cf-space-resource
   source:
-    target: {{pcfdev2_target}}
-    username: {{pcfdev2_username}}
-    password: {{pcfdev2_password}}
-    organization: integration
+    target: {{pez_target}}
+    username: {{pez_username}}
+    password: {{pez_password}}
+    organization: {{pez_org}}
     TYPE: NET451
 
 groups:
@@ -185,8 +185,12 @@ jobs:
     resource: samples-postgresql-efcore
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -217,8 +221,12 @@ jobs:
     resource: samples-postgresql-efcore
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -249,8 +257,12 @@ jobs:
     resource: samples-postgresql-efcore
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -281,8 +293,12 @@ jobs:
     resource: samples-postgresql
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -313,8 +329,12 @@ jobs:
     resource: samples-postgresql
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -345,8 +365,12 @@ jobs:
     resource: samples-postgresql
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
@@ -377,7 +401,7 @@ jobs:
     resource: samples-rabbit
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -410,7 +434,7 @@ jobs:
     resource: samples-rabbit
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -443,7 +467,7 @@ jobs:
     resource: samples-rabbit
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -476,12 +500,12 @@ jobs:
     resource: samples-mysql
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_SERVICE: p-mysql 512mb myMySqlService
+        CREATE_SERVICE: p-mysql 100mb-dev myMySqlService
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
@@ -508,12 +532,12 @@ jobs:
     resource: samples-mysql-ef6
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_SERVICE: p-mysql 512mb myMySqlService
+        CREATE_SERVICE: p-mysql 100mb-dev myMySqlService
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
@@ -540,12 +564,12 @@ jobs:
     resource: samples-oauth
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
@@ -558,7 +582,7 @@ jobs:
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/OAuthOptions
-        TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
+        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
     ensure:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
@@ -573,12 +597,12 @@ jobs:
     resource: samples-oauth
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
@@ -591,7 +615,7 @@ jobs:
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/OAuthOptions
-        TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
+        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
     ensure:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
@@ -605,12 +629,12 @@ jobs:
     resource: samples-oauth
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
@@ -623,7 +647,7 @@ jobs:
       file: steeltoe-ci/tasks/test-app.yml
       params:
         URL_PATH: /Home/OAuthOptions
-        TEXT: <h4>AccessTokenUrl = https://login.pcfdev.shoetree.io/oauth/token
+        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
     ensure:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
@@ -637,7 +661,7 @@ jobs:
     resource: samples-redis
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -669,7 +693,7 @@ jobs:
     resource: samples-caching
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -701,7 +725,7 @@ jobs:
     resource: samples-config
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -735,7 +759,7 @@ jobs:
     resource: samples-config
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -769,7 +793,7 @@ jobs:
     resource: samples-config
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -803,14 +827,14 @@ jobs:
     resource: samples-security
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.run.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -874,14 +898,14 @@ jobs:
     resource: samples-security
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.run.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -945,14 +969,14 @@ jobs:
     resource: samples-security
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.pcfdev.shoetree.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.run.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -1014,8 +1038,12 @@ jobs:
     resource: samples-music-store
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-cloudfoundry-services
       config:
         platform: linux
@@ -1112,8 +1140,12 @@ jobs:
     resource: samples-music-store
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-cloudfoundry-services
       config:
         platform: linux
@@ -1210,8 +1242,12 @@ jobs:
     resource: samples-music-store
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
+    - task: create-service-broker
+      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+      params:
+        ADMIN_PASSWORD: {{whaledb_password}}
     - task: create-cloudfoundry-services
       config:
         platform: linux
@@ -1229,7 +1265,7 @@ jobs:
           - |
             ./cf-space/login
             cd samples/MusicStore
-            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/p-mysql 512mb/' | sh
+            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/p-mysql 100mb-dev/' | sh
     - aggregate:
       - do:
         - task: publish-MusicStoreService
@@ -1308,7 +1344,7 @@ jobs:
     resource: samples-discovery
     trigger: false
   - put: cf-space
-    resource: pcfdev-linux
+    resource: pez-linux
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -1355,7 +1391,7 @@ jobs:
     resource: samples-discovery
     trigger: false
   - put: cf-space
-    resource: pcfdev-windows
+    resource: pez-windows
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -1402,7 +1438,7 @@ jobs:
     resource: samples-discovery
     trigger: false
   - put: cf-space
-    resource: pcfdev-net451
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml

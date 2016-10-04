@@ -10,23 +10,25 @@ jobs:
         source:
           repository: dgodd/cf-cli
       params:
-        CF_TARGET: {{pcfdev2_target}}
-        CF_USERNAME: {{pcfdev2_username}}
-        CF_PASSWORD: {{pcfdev2_password}}
-        CF_ORGANIZATION: integration
+        CF_TARGET: {{pez_target}}
+        CF_USERNAME: {{pez_username}}
+        CF_PASSWORD: {{pez_password}}
+        CF_ORGANIZATION: {{pez_org}}
       run:
         path: sh
         args:
         - -ec
         - |
-          cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o system -s system
+          cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o $CF_ORGANIZATION -s development
           set -x
 
           echo "Remove all integration spaces"
           export SPACES=`cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].metadata.guid'`
           for space in $SPACES; do
-            echo $space
-            cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
+            if [ ${space:0:5} == "test_" ]; then
+              echo $space
+              cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
+            fi
           done
 
           echo "Remove all spring cloud service instances"
