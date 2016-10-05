@@ -5,7 +5,7 @@ require 'json'
 require 'uri'
 
 space = ENV['SPACE'] or raise 'Please specify space'
-uri = URI("http://fortuneui-#{space}.pcfdev.shoetree.io/random")
+uri = URI("http://fortuneui-#{space}.cfapps.pez.pivotal.io/random")
 puts "Check #{uri}"
 # => {"id"=>1021, "text"=>"The greatest risk is not taking one."}
 res = Net::HTTP.get_response(uri)

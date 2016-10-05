@@ -1,0 +1,28 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: openjdk
+inputs:
+- name: cf-space
+- name: uaa
+run:
+  path: sh
+  args:
+  - -euxc
+  - |
+    curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
+    ./cf-space/login
+    . ./cf-space/variables
+
+    cd uaa/
+    export TERM=dumb
+    ./gradlew :cloudfoundry-identity-uaa:war
+    cf push myuaa --no-start -m 1024M -p uaa/build/libs/cloudfoundry-identity-uaa-*.war --hostname myuaa-${SPACE}  -b https://github.com/cloudfoundry/java-buildpack.git
+    cf set-env myuaa SPRING_PROFILES_ACTIVE default,hsqldb
+    cf set-env myuaa UAA_URL https://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    cf set-env myuaa LOGIN_URL https://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    cf set-env myuaa JBP_CONFIG_SPRING_AUTO_RECONFIGURATION '[enabled: false]'
+    cf set-env myuaa JBP_CONFIG_TOMCAT '{tomcat: { version: 7.0.+ }}'
+    cf start myuaa

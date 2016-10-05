@@ -23,12 +23,10 @@ jobs:
           set -x
 
           echo "Remove all integration spaces"
-          export SPACES=`cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].metadata.guid'`
+          export SPACES=`cf curl "/v2/organizations?q=name%3Apivot-kgross&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[]|{name: .entity.name, guid: .metadata.guid}|select(.name|contains("development")|not)|select(.name|contains("system")|not)|.guid'`
           for space in $SPACES; do
-            if [ ${space:0:5} == "test_" ]; then
-              echo $space
-              cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
-            fi
+            echo $space
+            cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
           done
 
           echo "Remove all spring cloud service instances"

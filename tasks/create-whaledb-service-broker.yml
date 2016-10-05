@@ -15,13 +15,11 @@ run:
     ./cf-space/login
     . ./cf-space/variables
 
-    export SAFESPACE=`echo $SPACE | sed 's/_/-/g' | sed 's/^test-//g'`
-
     cf target -s shoetree-system
-    cf map-route whale-db cfapps.pez.pivotal.io --hostname whale-db-${SAFESPACE}
+    cf map-route whale-db cfapps.pez.pivotal.io --hostname whale-db-${SPACE}
 
     cf target -s $SPACE
 
     set +x
-    echo "cf create-service-broker WhaleDB${SAFESPACE} admin [ADMIN_PASSWORD] https://whale-db-${SAFESPACE}.cfapps.pez.pivotal.io --space-scoped"
-    cf create-service-broker WhaleDB${SAFESPACE} admin ${ADMIN_PASSWORD} https://whale-db-${SAFESPACE}.cfapps.pez.pivotal.io --space-scoped
+    echo "cf create-service-broker WhaleDB${SPACE} admin [ADMIN_PASSWORD] https://whale-db-${SPACE}.cfapps.pez.pivotal.io --space-scoped"
+    cf create-service-broker WhaleDB${SPACE} admin ${ADMIN_PASSWORD} https://whale-db-${SPACE}.cfapps.pez.pivotal.io --space-scoped
