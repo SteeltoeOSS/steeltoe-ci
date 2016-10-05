@@ -13,7 +13,7 @@ ORGANIZATION=`jq -r '.source.organization' < $payload`
 
 cf login -a $TARGET -u $USERNAME -p $PASSWORD --skip-ssl-validation -o $ORGANIZATION -s development
 
-SPACE=test_$(pwgen -1 | awk '{print tolower($0)}')
+SPACE=$(pwgen -1 | awk '{print tolower($0)}')
 cf create-space ${SPACE} -o $ORGANIZATION
 
 echo "{\"version\": {\"ref\":\"$SPACE\"},\"metadata\":[]}" >&3

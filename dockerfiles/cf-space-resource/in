@@ -24,8 +24,6 @@ source $DESTINATION/login
 
 echo $SPACE > $DESTINATION/name
 echo "export SPACE=$SPACE" > $DESTINATION/variables
-SAFESPACE=`echo $SPACE | sed 's/_/-/g' | sed 's/^test-//g'`
-echo "export SAFESPACE=$SAFESPACE" >> $DESTINATION/variables
 
 if [ $TYPE == "LINUX" ]; then
   echo "export MANIFEST_YAML=manifest.yml" >> $DESTINATION/variables

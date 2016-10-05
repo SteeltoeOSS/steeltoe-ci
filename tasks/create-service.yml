@@ -16,7 +16,7 @@ run:
     . ./cf-space/variables
 
     if [ ! -z "$CREATE_SERVICE" ]; then
-      cf create-service $(echo $CREATE_SERVICE | sed "s/WhaleDB/WhaleDB$SAFESPACE/g")
+      cf create-service $(echo $CREATE_SERVICE | sed "s/WhaleDB/WhaleDB$SPACE/g")
     fi
     if [ ! -z "$CREATE_CUPS" ]; then
       cf cups $(echo $CREATE_CUPS | sed "s/\${SPACE}/$SPACE/g")
