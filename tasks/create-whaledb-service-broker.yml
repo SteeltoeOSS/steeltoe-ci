@@ -15,8 +15,6 @@ run:
     ./cf-space/login
     . ./cf-space/variables
 
-    export SAFESPACE=`echo $SPACE | sed 's/_/-/g' | sed 's/^test-//g'`
-
     cf target -s shoetree-system
     cf map-route whale-db cfapps.pez.pivotal.io --hostname whale-db-${SAFESPACE}
 

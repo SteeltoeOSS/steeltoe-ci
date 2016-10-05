@@ -10,7 +10,7 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: master
+    branch: pez
 - name: samples-rabbit
   type: git
   source:
