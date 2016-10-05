@@ -8,7 +8,7 @@ agent = Mechanize.new
 agent.verify_mode = 0
 
 puts "Start"
-page = agent.get("http://musicui-#{space}.pcfdev.shoetree.io/")
+page = agent.get("http://musicui-#{space}.cfapps.pez.pivotal.io/")
 
 puts "View Classical Genre"
 page = page.link_with(href: /Genre=Classical/).click

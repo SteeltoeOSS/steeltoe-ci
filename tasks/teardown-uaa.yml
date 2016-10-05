@@ -16,7 +16,7 @@ run:
     curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
     ./cf-space/login
     . ./cf-space/variables
-    uaac target uaa.pcfdev.shoetree.io --skip-ssl-validation
+    uaac target uaa.cfapps.pez.pivotal.io --skip-ssl-validation
     uaac token client get admin -s admin-client-secret
     uaac contexts
     uaac user delete user${SPACE}
