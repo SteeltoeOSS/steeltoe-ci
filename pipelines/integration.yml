@@ -1061,7 +1061,7 @@ jobs:
           - |
             ./cf-space/login
             cd samples/MusicStore
-            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/WhaleDB public/' | sh
+            cat createCloudFoundryServices.sh | sed "s/p-mysql pre-existing-plan/WhaleDB${SAFESPACE} public/" | sh
     - aggregate:
       - do:
         - task: publish-MusicStoreService
@@ -1163,7 +1163,7 @@ jobs:
           - |
             ./cf-space/login
             cd samples/MusicStore
-            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/WhaleDB public/' | sh
+            cat createCloudFoundryServices.sh | sed "s/p-mysql pre-existing-plan/WhaleDB${SAFESPACE} public/" | sh
     - aggregate:
       - do:
         - task: publish-MusicStoreService
