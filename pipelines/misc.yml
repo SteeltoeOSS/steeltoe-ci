@@ -25,10 +25,18 @@ jobs:
           echo "Remove all integration spaces"
           export SPACES=`cf curl "/v2/organizations?q=name%3A${CF_ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[].metadata.guid'`
           for space in $SPACES; do
-            if [ $space != "development" ] && [ $space != "shoetree-system" ]; then
-              echo $space
-              cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
-            fi
+            echo $space
+            case $space in
+              development)
+                echo "  Skipping"
+                ;;
+              shoetree-system)
+                echo "  Skipping"
+                ;;
+              *)
+                cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
+                ;;
+            esac
           done
 
           echo "Remove all spring cloud service instances"
