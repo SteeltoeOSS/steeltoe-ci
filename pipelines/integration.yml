@@ -141,8 +141,8 @@ groups:
       - postgres-net451
   - name: mysql
     jobs:
-      - mysql-windows
-      - mysql-ef6-windows
+      - mysql-net451
+      - mysql-ef6-net451
   - name: rabbit
     jobs:
       - rabbit-linux
@@ -491,7 +491,7 @@ jobs:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
 
-- name: mysql-windows
+- name: mysql-net451
   plan:
   - get: steeltoe-ci
   - get: connectors
@@ -500,7 +500,7 @@ jobs:
     resource: samples-mysql
     trigger: false
   - put: cf-space
-    resource: pez-windows
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -523,7 +523,7 @@ jobs:
       task: delete-space
       file: steeltoe-ci/tasks/delete-space.yml
 
-- name: mysql-ef6-windows
+- name: mysql-ef6-net451
   plan:
   - get: steeltoe-ci
   - get: connectors
@@ -532,7 +532,7 @@ jobs:
     resource: samples-mysql-ef6
     trigger: false
   - put: cf-space
-    resource: pez-windows
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -661,7 +661,7 @@ jobs:
     resource: samples-redis
     trigger: false
   - put: cf-space
-    resource: pez-windows
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
@@ -693,7 +693,7 @@ jobs:
     resource: samples-caching
     trigger: false
   - put: cf-space
-    resource: pez-windows
+    resource: pez-net451
   - do:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
