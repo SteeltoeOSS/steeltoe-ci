@@ -12,7 +12,7 @@ run:
   args:
   - -exc
   - |
-    ./cf-space/login
+    ./cf-space/login || true
     . ./cf-space/variables
 
     cf target -s shoetree-system
