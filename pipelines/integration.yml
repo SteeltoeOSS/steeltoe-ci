@@ -209,8 +209,13 @@ jobs:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key2=Test Data 2
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+      do:
+      - task: delete-space
+        file: steeltoe-ci/tasks/delete-space.yml
+      - task: create-service-broker
+        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+        params:
+          ADMIN_PASSWORD: {{whaledb_password}}
 
 - name: postgres-efcore-windows
   plan:
@@ -245,8 +250,13 @@ jobs:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key2=Test Data 2
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+      do:
+      - task: delete-space
+        file: steeltoe-ci/tasks/delete-space.yml
+      - task: create-service-broker
+        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+        params:
+          ADMIN_PASSWORD: {{whaledb_password}}
 
 - name: postgres-efcore-net451
   plan:
@@ -281,8 +291,13 @@ jobs:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key2=Test Data 2
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+      do:
+      - task: delete-space
+        file: steeltoe-ci/tasks/delete-space.yml
+      - task: create-service-broker
+        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+        params:
+          ADMIN_PASSWORD: {{whaledb_password}}
 
 - name: postgres-linux
   plan:
@@ -317,8 +332,13 @@ jobs:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key1=Row1 Text
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+      do:
+      - task: delete-space
+        file: steeltoe-ci/tasks/delete-space.yml
+      - task: create-service-broker
+        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+        params:
+          ADMIN_PASSWORD: {{whaledb_password}}
 
 - name: postgres-windows
   plan:
@@ -353,8 +373,13 @@ jobs:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key1=Row1 Text
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+      do:
+      - task: delete-space
+        file: steeltoe-ci/tasks/delete-space.yml
+      - task: create-service-broker
+        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+        params:
+          ADMIN_PASSWORD: {{whaledb_password}}
 
 - name: postgres-net451
   plan:
@@ -389,8 +414,13 @@ jobs:
         URL_PATH: /Home/PostgresData
         TEXT: <h3>Key1=Row1 Text
     ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+      do:
+      - task: delete-space
+        file: steeltoe-ci/tasks/delete-space.yml
+      - task: create-service-broker
+        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+        params:
+          ADMIN_PASSWORD: {{whaledb_password}}
 
 - name: rabbit-linux
   plan:
