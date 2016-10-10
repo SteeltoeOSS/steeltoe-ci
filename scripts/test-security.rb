@@ -8,7 +8,7 @@ agent = Mechanize.new
 agent.verify_mode = 0
 
 page = agent.get("http://single-signon-#{space}.cfapps.pez.pivotal.io/Home/About")
-page.uri.to_s.match('http://myuaa-.*.cfapps.pez.pivotal.io/login') or raise 'Should force Auth'
+page.uri.to_s.match('http[s]?://myuaa-.*.cfapps.pez.pivotal.io/login') or raise 'Should force Auth'
 page = page.form_with(action: '/login.do') do |f|
   f.username = "user#{space}"
   f.password = 'Password1!'

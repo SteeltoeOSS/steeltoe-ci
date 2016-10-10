@@ -1372,9 +1372,9 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-musicstore.rb
-    # ensure:
-      # task: delete-space
-      # file: steeltoe-ci/tasks/delete-space.yml
+    ensure:
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: discovery-linux
   plan:
