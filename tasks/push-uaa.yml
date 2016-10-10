@@ -21,8 +21,8 @@ run:
     ./gradlew :cloudfoundry-identity-uaa:war
     cf push myuaa --no-start -m 1024M -p uaa/build/libs/cloudfoundry-identity-uaa-*.war --hostname myuaa-${SPACE}  -b https://github.com/cloudfoundry/java-buildpack.git
     cf set-env myuaa SPRING_PROFILES_ACTIVE default,hsqldb
-    cf set-env myuaa UAA_URL http://myuaa-${SPACE}.cfapps.pez.pivotal.io
-    cf set-env myuaa LOGIN_URL http://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    cf set-env myuaa UAA_URL https://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    cf set-env myuaa LOGIN_URL https://myuaa-${SPACE}.cfapps.pez.pivotal.io
     cf set-env myuaa JBP_CONFIG_SPRING_AUTO_RECONFIGURATION '[enabled: false]'
     cf set-env myuaa JBP_CONFIG_TOMCAT '{tomcat: { version: 7.0.+ }}'
     cf start myuaa

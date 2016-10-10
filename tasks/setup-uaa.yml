@@ -17,7 +17,7 @@ run:
     ./cf-space/login
     . ./cf-space/variables
 
-    uaac target http://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    uaac target https://myuaa-${SPACE}.cfapps.pez.pivotal.io
     uaac token client get admin -s adminsecret
     uaac contexts
     uaac group add testgroup || true
