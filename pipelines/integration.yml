@@ -920,12 +920,9 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-security.rb
-    ensure:
-      do:
-        - task: teardown-uaa
-          file: steeltoe-ci/tasks/teardown-uaa.yml
-        - task: delete-space
-          file: steeltoe-ci/tasks/delete-space.yml
+    # ensure:
+      # task: delete-space
+      # file: steeltoe-ci/tasks/delete-space.yml
 
 - name: security-windows
   plan:
@@ -995,11 +992,8 @@ jobs:
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-security.rb
     ensure:
-      do:
-        - task: teardown-uaa
-          file: steeltoe-ci/tasks/teardown-uaa.yml
-        - task: delete-space
-          file: steeltoe-ci/tasks/delete-space.yml
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: security-net451
   plan:
@@ -1069,11 +1063,10 @@ jobs:
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-security.rb
     ensure:
-      do:
-        - task: teardown-uaa
-          file: steeltoe-ci/tasks/teardown-uaa.yml
-        - task: delete-space
-          file: steeltoe-ci/tasks/delete-space.yml
+      task: teardown-uaa
+      file: steeltoe-ci/tasks/teardown-uaa.yml
+      task: delete-space
+      file: steeltoe-ci/tasks/delete-space.yml
 
 - name: music-store-linux
   plan:
@@ -1379,9 +1372,9 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-musicstore.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+    # ensure:
+      # task: delete-space
+      # file: steeltoe-ci/tasks/delete-space.yml
 
 - name: discovery-linux
   plan:
