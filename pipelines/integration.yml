@@ -872,7 +872,7 @@ jobs:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.run.pez.pivotal.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -943,7 +943,7 @@ jobs:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.run.pez.pivotal.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -1014,7 +1014,7 @@ jobs:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://login.run.pez.pivotal.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
