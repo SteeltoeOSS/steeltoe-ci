@@ -16,8 +16,9 @@ run:
     curl -L 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github' | tar -zx -C /usr/local/bin/
     ./cf-space/login
     . ./cf-space/variables
-    uaac target uaa.cfapps.pez.pivotal.io --skip-ssl-validation
-    uaac token client get admin -s admin-client-secret
+
+    uaac target https://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    uaac token client get admin -s adminsecret
     uaac contexts
     uaac group add testgroup || true
     uaac user add user${SPACE} --given_name Integration --family_name Test --emails test@testcloud.com --password Password1!

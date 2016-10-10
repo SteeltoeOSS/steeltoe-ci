@@ -100,6 +100,11 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Connectors.git
     branch: dev
+- name: uaa
+  type: git
+  source:
+    uri: git://github.com/cloudfoundry/uaa.git
+    branch: master
 - name: pez-linux
   type: cf-space-resource
   source:
@@ -856,9 +861,12 @@ jobs:
   - get: samples
     resource: samples-security
     trigger: false
+  - get: uaa
   - put: cf-space
     resource: pez-linux
   - do:
+    - task: push-uaa
+      file: steeltoe-ci/tasks/push-uaa.yml
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
@@ -927,9 +935,12 @@ jobs:
   - get: samples
     resource: samples-security
     trigger: false
+  - get: uaa
   - put: cf-space
     resource: pez-windows
   - do:
+    - task: push-uaa
+      file: steeltoe-ci/tasks/push-uaa.yml
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
@@ -998,9 +1009,12 @@ jobs:
   - get: samples
     resource: samples-security
     trigger: false
+  - get: uaa
   - put: cf-space
     resource: pez-net451
   - do:
+    - task: push-uaa
+      file: steeltoe-ci/tasks/push-uaa.yml
     - task: setup-uaa
       file: steeltoe-ci/tasks/setup-uaa.yml
     - task: create-service
