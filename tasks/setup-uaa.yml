@@ -17,11 +17,11 @@ run:
     ./cf-space/login
     . ./cf-space/variables
 
-    uaac target http://myuaa-${SPACE}.cfapps.pez.pivotal.io
+    uaac target https://myuaa-${SPACE}.cfapps.pez.pivotal.io
     uaac token client get admin -s adminsecret
     uaac contexts
     uaac group add testgroup || true
     uaac user add user${SPACE} --given_name Integration --family_name Test --emails test@testcloud.com --password Password1!
     uaac member add testgroup user${SPACE}
-    uaac client add ${SPACE}TestApp --name ${SPACE}TestApp --scope cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --authorized_grant_types authorization_code,refresh_token --authorities uaa.resource --redirect_uri http://single-signon-${SPACE}.cfapps.pez.pivotal.io/signin-cloudfoundry --autoapprove cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --secret ${SPACE}TestApp
+    uaac client add ${SPACE}TestApp --name ${SPACE}TestApp --scope cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --authorized_grant_types authorization_code,refresh_token --authorities uaa.resource --redirect_uri https://single-signon-${SPACE}.cfapps.pez.pivotal.io/signin-cloudfoundry --autoapprove cloud_controller.read,cloud_controller_service_permissions.read,openid,testgroup --secret ${SPACE}TestApp
     echo "{\"username\":\"user${SPACE}\",\"password\":\"Password1!\"}" > cf-app-login/login.json

@@ -7,13 +7,13 @@ space = ENV['SPACE'] or raise 'Please specify space'
 agent = Mechanize.new
 agent.verify_mode = 0
 
-page = agent.get("http://single-signon-#{space}.cfapps.pez.pivotal.io/Home/About")
-page.uri.to_s.match('http://myuaa-.*.cfapps.pez.pivotal.io/login') or raise 'Should force Auth'
+page = agent.get("https://single-signon-#{space}.cfapps.pez.pivotal.io/Home/About")
+page.uri.to_s.match('https://myuaa-.*.cfapps.pez.pivotal.io/login') or raise 'Should force Auth'
 page = page.form_with(action: '/login.do') do |f|
   f.username = "user#{space}"
   f.password = 'Password1!'
 end.submit
-page.uri.to_s.match("http://single-signon-#{space}.cfapps.pez.pivotal.io/Home/About") or raise "Should have redirected to About"
+page.uri.to_s.match("https://single-signon-#{space}.cfapps.pez.pivotal.io/Home/About") or raise "Should have redirected to About"
 page.body.match('Your About page') or raise 'Should now allow testgroup access'
 
 page = page.link_with(:href => /Contact/).click
