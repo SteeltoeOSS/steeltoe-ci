@@ -10,7 +10,7 @@ resources:
   type: git
   source:
     uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: master
+    branch: pez2
 - name: samples-rabbit
   type: git
   source:
@@ -185,10 +185,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-postgresql-efcore
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -226,10 +226,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-postgresql-efcore
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -267,10 +267,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-postgresql-efcore
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -308,10 +308,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-postgresql
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -349,10 +349,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-postgresql
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -390,10 +390,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-postgresql
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -431,10 +431,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-rabbit
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -464,10 +464,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-rabbit
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -497,10 +497,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-rabbit
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -530,10 +530,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-mysql
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -562,10 +562,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-mysql-ef6
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -594,10 +594,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-oauth
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -627,10 +627,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-oauth
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -659,10 +659,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-oauth
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -691,10 +691,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-redis
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -723,10 +723,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-caching
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -755,10 +755,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-config
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -789,10 +789,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-config
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -823,10 +823,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-config
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -857,10 +857,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-security
-    trigger: true
+    trigger: false
   - get: uaa
   - put: cf-space
     resource: pez-linux
@@ -872,7 +872,7 @@ jobs:
     - task: create-service
       file: steeltoe-ci/tasks/create-service.yml
       params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
+        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}","client_secret":"${SPACE}","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
     - aggregate:
       - do:
         - task: publish-signon
@@ -920,18 +920,18 @@ jobs:
           - |
             export SPACE=`cat cf-space/name`
             ./steeltoe-ci/scripts/test-security.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+    # ensure:
+      # task: delete-space
+      # file: steeltoe-ci/tasks/delete-space.yml
 
 - name: security-windows
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-security
-    trigger: true
+    trigger: false
   - get: uaa
   - put: cf-space
     resource: pez-windows
@@ -999,10 +999,10 @@ jobs:
   plan:
   - get: steeltoe-ci
   - get: connectors
-    trigger: true
+    trigger: false
   - get: samples
     resource: samples-security
-    trigger: true
+    trigger: false
   - get: uaa
   - put: cf-space
     resource: pez-net451
@@ -1073,7 +1073,7 @@ jobs:
   - get: steeltoe-ci
   - get: samples
     resource: samples-music-store
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -1176,7 +1176,7 @@ jobs:
   - get: steeltoe-ci
   - get: samples
     resource: samples-music-store
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -1279,7 +1279,7 @@ jobs:
   - get: steeltoe-ci
   - get: samples
     resource: samples-music-store
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
@@ -1381,7 +1381,7 @@ jobs:
   - get: steeltoe-ci
   - get: samples
     resource: samples-discovery
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-linux
   - do:
@@ -1428,7 +1428,7 @@ jobs:
   - get: steeltoe-ci
   - get: samples
     resource: samples-discovery
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-windows
   - do:
@@ -1475,7 +1475,7 @@ jobs:
   - get: steeltoe-ci
   - get: samples
     resource: samples-discovery
-    trigger: true
+    trigger: false
   - put: cf-space
     resource: pez-net451
   - do:
