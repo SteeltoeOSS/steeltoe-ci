@@ -1,6 +1,6 @@
 # steeltoe-ci
 
-Config files for Steeltoe CI, (https://ci.shoetree.io).
+Config files for Steeltoe CI
 
 ## Changing pipelines
 
