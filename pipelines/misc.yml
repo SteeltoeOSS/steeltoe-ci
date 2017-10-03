@@ -1,37 +1,37 @@
----
-jobs:
-- name: cleanup-pcfdev
-  plan:
-  - task: remove-all-spaces
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: dgodd/cf-cli
-      params:
-        CF_TARGET: {{pez_target}}
-        CF_USERNAME: {{pez_username}}
-        CF_PASSWORD: {{pez_password}}
-        CF_ORGANIZATION: {{pez_org}}
-      run:
-        path: sh
-        args:
-        - -ec
-        - |
-          cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o $CF_ORGANIZATION -s development
-          set -x
-
-          echo "Remove all integration spaces"
-          export SPACES=`cf curl "/v2/organizations?q=name%3Apivot-kgross&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[]|{name: .entity.name, guid: .metadata.guid}|select(.name|contains("development")|not)|select(.name|contains("system")|not)|.guid'`
-          for space in $SPACES; do
-            echo $space
-            cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
-          done
-
-          echo "Remove all spring cloud service instances"
-          export APPS=`cf curl '/v2/organizations?q=name%3Ap-spring-cloud-services&inline-relations-depth=2' | jq -r '.resources[].entity.spaces[].entity|select(.name|contains("instances"))|.apps[].metadata.guid'`
-          for app in $APPS; do
-            echo $app
-            cf curl -X DELETE "/v2/apps/$app?async=true&recursive=true"
-          done
+#---
+#jobs:
+#- name: cleanup-pcfdev
+#  plan:
+#  - task: remove-all-spaces
+#    config:
+#      platform: linux
+#      image_resource:
+#        type: docker-image
+#        source:
+#          repository: dgodd/cf-cli
+#      params:
+#        CF_TARGET: {{pez_target}}
+#        CF_USERNAME: {{pez_username}}
+#        CF_PASSWORD: {{pez_password}}
+#        CF_ORGANIZATION: {{pez_org}}
+#      run:
+#        path: sh
+#        args:
+#        - -ec
+#        - |
+#          cf login -a $CF_TARGET -u $CF_USERNAME -p $CF_PASSWORD --skip-ssl-validation -o $CF_ORGANIZATION -s development
+#          set -x
+#
+#          echo "Remove all integration spaces"
+#          export SPACES=`cf curl "/v2/organizations?q=name%3Apivot-kgross&inline-relations-depth=1" | jq -r '.resources[].entity.spaces|sort_by(.metadata.created_at)|reverse|.[]|{name: .entity.name, guid: .metadata.guid}|select(.name|contains("development")|not)|select(.name|contains("system")|not)|.guid'`
+#          for space in $SPACES; do
+#            echo $space
+#            cf curl -X DELETE "/v2/spaces/$space?async=true&recursive=true"
+#          done
+#
+#          echo "Remove all spring cloud service instances"
+#          export APPS=`cf curl '/v2/organizations?q=name%3Ap-spring-cloud-services&inline-relations-depth=2' | jq -r '.resources[].entity.spaces[].entity|select(.name|contains("instances"))|.apps[].metadata.guid'`
+#          for app in $APPS; do
+#            echo $app
+#            cf curl -X DELETE "/v2/apps/$app?async=true&recursive=true"
+#          done

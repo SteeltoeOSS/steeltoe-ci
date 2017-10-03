@@ -1,25 +1,25 @@
----
-platform: linux
-image_resource:
-  type: docker-image
-  source:
-    repository: dgodd/cf-cli
-inputs:
-- name: cf-space
-- name: samples
-run:
-  path: sh
-  args:
-  - -exc
-  - |
-    ./cf-space/login
-    . ./cf-space/variables
-
-    cf target -s shoetree-system
-    cf map-route whale-db cfapps.pez.pivotal.io --hostname whale-db-${SPACE}
-
-    cf target -s $SPACE
-
-    set +x
-    echo "cf create-service-broker WhaleDB${SPACE} admin [ADMIN_PASSWORD] https://whale-db-${SPACE}.cfapps.pez.pivotal.io --space-scoped"
-    cf create-service-broker WhaleDB${SPACE} admin ${ADMIN_PASSWORD} https://whale-db-${SPACE}.cfapps.pez.pivotal.io --space-scoped
+#---
+#platform: linux
+#image_resource:
+#  type: docker-image
+#  source:
+#    repository: dgodd/cf-cli
+#inputs:
+#- name: cf-space
+#- name: samples
+#run:
+#  path: sh
+#  args:
+#  - -exc
+#  - |
+#    ./cf-space/login
+#    . ./cf-space/variables
+#
+#    cf target -s shoetree-system
+#    cf map-route whale-db cfapps.pez.pivotal.io --hostname whale-db-${SPACE}
+#
+#    cf target -s $SPACE
+#
+#    set +x
+#    echo "cf create-service-broker WhaleDB${SPACE} admin [ADMIN_PASSWORD] https://whale-db-${SPACE}.cfapps.pez.pivotal.io --space-scoped"
+#    cf create-service-broker WhaleDB${SPACE} admin ${ADMIN_PASSWORD} https://whale-db-${SPACE}.cfapps.pez.pivotal.io --space-scoped

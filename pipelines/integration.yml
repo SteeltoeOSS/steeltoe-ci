@@ -1,1518 +1,1518 @@
----
-resource_types:
-- name: cf-space-resource
-  type: docker-image
-  source:
-    repository: dgodd/cf-space-resource
-
-resources:
-- name: steeltoe-ci
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/steeltoe-ci.git
-    branch: master
-- name: samples-rabbit
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/Rabbit/
-    branch: dev
-- name: samples-postgresql
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/PostgreSql/
-    branch: dev
-- name: samples-mysql-ef6
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/MySqlEF6/
-    branch: dev
-- name: samples-caching
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Caching/src/RedisCloudFoundry/
-    branch: dev
-- name: samples-config
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Configuration/src/AspDotNetCore/SimpleCloudFoundry
-    branch: dev
-- name: samples-mysql
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/MySql/
-    branch: dev
-- name: samples-oauth
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/OAuth/
-    branch: dev
-- name: samples-postgresql-efcore
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/PostgreEFCore/
-    branch: dev
-- name: samples-redis
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Connectors/src/Redis/
-    branch: dev
-- name: samples-security
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Security/src
-    branch: dev
-- name: samples-music-store
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - MusicStore/src
-    branch: dev
-- name: samples-discovery
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Samples.git
-    paths:
-    - Discovery/src
-    branch: dev
-- name: connectors
-  type: git
-  source:
-    uri: https://github.com/SteelToeOSS/Connectors.git
-    branch: dev
-- name: uaa
-  type: git
-  source:
-    uri: git://github.com/cloudfoundry/uaa.git
-    branch: master
-- name: pez-linux
-  type: cf-space-resource
-  source:
-    target: {{pez_target}}
-    username: {{pez_username}}
-    password: {{pez_password}}
-    organization: {{pez_org}}
-    TYPE: LINUX
-- name: pez-windows
-  type: cf-space-resource
-  source:
-    target: {{pez_target}}
-    username: {{pez_username}}
-    password: {{pez_password}}
-    organization: {{pez_org}}
-    TYPE: WINDOWS
-- name: pez-net451
-  type: cf-space-resource
-  source:
-    target: {{pez_target}}
-    username: {{pez_username}}
-    password: {{pez_password}}
-    organization: {{pez_org}}
-    TYPE: NET451
-
-groups:
-  - name: music-store
-    jobs:
-      - music-store-linux
-      - music-store-windows
-      - music-store-net451
-  - name: postgresql
-    jobs:
-      - postgres-efcore-linux
-      - postgres-efcore-windows
-      - postgres-efcore-net451
-      - postgres-linux
-      - postgres-windows
-      - postgres-net451
-  - name: mysql
-    jobs:
-      - mysql-net451
-      - mysql-ef6-net451
-  - name: rabbit
-    jobs:
-      - rabbit-linux
-      - rabbit-windows
-      - rabbit-net451
-  - name: oauth
-    jobs:
-      - oauth-linux
-      - oauth-windows
-      - oauth-net451
-  - name: redis
-    jobs:
-      - redis-net451-windows
-  - name: caching
-    jobs:
-      - caching-redis-net451-windows
-  - name: config
-    jobs:
-      - config-windows
-      - config-linux
-      - config-net451
-  - name: security
-    jobs:
-      - security-linux
-      - security-windows
-      - security-net451
-  - name: discovery
-    jobs:
-      - discovery-linux
-      - discovery-windows
-      - discovery-net451
-
-jobs:
-- name: postgres-efcore-linux
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-postgresql-efcore
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: WhaleDB public myPostgres
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/PostgresData
-        TEXT: <h3>Key2=Test Data 2
-    ensure:
-      do:
-      - task: delete-space
-        file: steeltoe-ci/tasks/delete-space.yml
-      - task: unmap-service-broker
-        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
-        params:
-          ADMIN_PASSWORD: {{whaledb_password}}
-
-- name: postgres-efcore-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-postgresql-efcore
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: WhaleDB public myPostgres
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/PostgresData
-        TEXT: <h3>Key2=Test Data 2
-    ensure:
-      do:
-      - task: delete-space
-        file: steeltoe-ci/tasks/delete-space.yml
-      - task: unmap-service-broker
-        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
-        params:
-          ADMIN_PASSWORD: {{whaledb_password}}
-
-- name: postgres-efcore-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-postgresql-efcore
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: WhaleDB public myPostgres
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/PostgresData
-        TEXT: <h3>Key2=Test Data 2
-    ensure:
-      do:
-      - task: delete-space
-        file: steeltoe-ci/tasks/delete-space.yml
-      - task: unmap-service-broker
-        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
-        params:
-          ADMIN_PASSWORD: {{whaledb_password}}
-
-- name: postgres-linux
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-postgresql
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: WhaleDB public myPostgres
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/PostgreSql/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/PostgresData
-        TEXT: <h3>Key1=Row1 Text
-    ensure:
-      do:
-      - task: delete-space
-        file: steeltoe-ci/tasks/delete-space.yml
-      - task: unmap-service-broker
-        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
-        params:
-          ADMIN_PASSWORD: {{whaledb_password}}
-
-- name: postgres-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-postgresql
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: WhaleDB public myPostgres
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/PostgreSql/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/PostgresData
-        TEXT: <h3>Key1=Row1 Text
-    ensure:
-      do:
-      - task: delete-space
-        file: steeltoe-ci/tasks/delete-space.yml
-      - task: unmap-service-broker
-        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
-        params:
-          ADMIN_PASSWORD: {{whaledb_password}}
-
-- name: postgres-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-postgresql
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: WhaleDB public myPostgres
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/PostgreSql/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/PostgresData
-        TEXT: <h3>Key1=Row1 Text
-    ensure:
-      do:
-      - task: delete-space
-        file: steeltoe-ci/tasks/delete-space.yml
-      - task: unmap-service-broker
-        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
-        params:
-          ADMIN_PASSWORD: {{whaledb_password}}
-
-- name: rabbit-linux
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-rabbit
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-rabbitmq standard myRabbitService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/Rabbit/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
-        URL_PATH: /
-        TEXT: <h3>Message=Some exciting text
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: rabbit-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-rabbit
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-rabbitmq standard myRabbitService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/Rabbit/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
-        URL_PATH: /
-        TEXT: <h3>Message=Some exciting text
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: rabbit-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-rabbit
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-rabbitmq standard myRabbitService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/Rabbit/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
-        URL_PATH: /
-        TEXT: <h3>Message=Some exciting text
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: mysql-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-mysql
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-mysql 100mb-dev myMySqlService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/MySql/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/MySqlData
-        TEXT: <h3>Key2=Row2 Text
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: mysql-ef6-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-mysql-ef6
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-mysql 100mb-dev myMySqlService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/MySql/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/MySqlData
-        TEXT: <h3>Key1=Row1 Text
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: oauth-linux
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-oauth
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/OAuth/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/OAuthOptions
-        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-
-- name: oauth-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-oauth
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/OAuth/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/OAuthOptions
-        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: oauth-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-oauth
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/OAuth/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/OAuthOptions
-        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: redis-net451-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-redis
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-redis shared-vm myRedisService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Connectors/src/Redis/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/CacheData
-        TEXT: <h3>Key1=Key1Value
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: caching-redis-net451-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-caching
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-redis shared-vm myRedisService
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Caching/src/RedisCloudFoundry/
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/CacheData
-        TEXT: <h3>Key1=Key1Value
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: config-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-config
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-      params:
-        APPNAME: foo
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/ConfigServer
-        TEXT: <h4>Property info.description=Spring Cloud Samples
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: config-linux
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-config
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-      params:
-        APPNAME: foo
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/ConfigServer
-        TEXT: <h4>Property bar=spam
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: config-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-config
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
-    - task: publish
-      file: steeltoe-ci/tasks/publish.yml
-      params:
-        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
-    - task: push-app
-      attempts: 2
-      file: steeltoe-ci/tasks/push-app.yml
-      params:
-        APPNAME: foo
-    - task: test-app
-      attempts: 5
-      file: steeltoe-ci/tasks/test-app.yml
-      params:
-        URL_PATH: /Home/ConfigServer
-        TEXT: <h4>Property info.description=Spring Cloud Samples
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: security-linux
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-security
-    trigger: true
-  - get: uaa
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: push-uaa
-      file: steeltoe-ci/tasks/push-uaa.yml
-    - task: setup-uaa
-      file: steeltoe-ci/tasks/setup-uaa.yml
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
-    - aggregate:
-      - do:
-        - task: publish-signon
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_signon}
-          params:
-            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
-        - task: push-signon
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_signon}
-          params:
-            APPNAME: single-signon
-      - do:
-        - task: publish-jwtauth
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_jwtauth}
-          params:
-            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
-            MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: ubuntu.14.04-x64
-        - task: push-jwtauth
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_jwtauth}
-          params:
-            STACK: cflinuxfs2
-            APPNAME: jwtauth
-    - task: test-app
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-security.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: security-windows
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-security
-    trigger: true
-  - get: uaa
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: push-uaa
-      file: steeltoe-ci/tasks/push-uaa.yml
-    - task: setup-uaa
-      file: steeltoe-ci/tasks/setup-uaa.yml
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
-    - aggregate:
-      - do:
-        - task: publish-signon
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_signon}
-          params:
-            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
-        - task: push-signon
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_signon}
-          params:
-            APPNAME: single-signon
-      - do:
-        - task: publish-jwtauth
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_jwtauth}
-          params:
-            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
-            RUNTIME: win7-x64
-        - task: push-jwtauth
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_jwtauth}
-          params:
-            STACK: windows2012R2
-            APPNAME: jwtauth
-    - task: test-app
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-security.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: security-net451
-  plan:
-  - get: steeltoe-ci
-  - get: connectors
-    trigger: true
-  - get: samples
-    resource: samples-security
-    trigger: true
-  - get: uaa
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: push-uaa
-      file: steeltoe-ci/tasks/push-uaa.yml
-    - task: setup-uaa
-      file: steeltoe-ci/tasks/setup-uaa.yml
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
-    - aggregate:
-      - do:
-        - task: publish-signon
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_signon}
-          params:
-            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
-        - task: push-signon
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_signon}
-          params:
-            APPNAME: single-signon
-      - do:
-        - task: publish-jwtauth
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_jwtauth}
-          params:
-            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
-            MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: net451
-            RUNTIME: win7-x64
-        - task: push-jwtauth
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_jwtauth}
-          params:
-            STACK: windows2012R2
-            APPNAME: jwtauth
-    - task: test-app
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-security.rb
-    ensure:
-      task: teardown-uaa
-      file: steeltoe-ci/tasks/teardown-uaa.yml
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: music-store-linux
-  plan:
-  - get: steeltoe-ci
-  - get: samples
-    resource: samples-music-store
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-cloudfoundry-services
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/cf-cli
-        inputs:
-        - name: cf-space
-        - name: samples
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            ./cf-space/login
-            . ./cf-space/variables
-            cd samples/MusicStore
-            cat createCloudFoundryServices.sh | sed "s/p-mysql pre-existing-plan/WhaleDB${SPACE} public/" | sh
-    - aggregate:
-      - do:
-        - task: publish-MusicStoreService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_musicstoreservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
-        - task: push-MusicStoreService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_musicstoreservice}
-          params:
-            APPNAME: musicstore
-      - do:
-        - task: publish-MusicStoreUI
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_musicstoreui}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
-        - task: push-MusicStoreUI
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_musicstoreui}
-          params:
-            APPNAME: musicui
-      - do:
-        - task: publish-OrderService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_orderservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/OrderService
-        - task: push-OrderService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_orderservice}
-          params:
-            APPNAME: orderprocessing
-      - do:
-        - task: publish-ShoppingCartService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_shoppingcartservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
-        - task: push-ShoppingCartService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_shoppingcartservice}
-          params:
-            APPNAME: shoppingcart
-    - task: test-app
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-musicstore.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: music-store-windows
-  plan:
-  - get: steeltoe-ci
-  - get: samples
-    resource: samples-music-store
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-cloudfoundry-services
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/cf-cli
-        inputs:
-        - name: cf-space
-        - name: samples
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            ./cf-space/login
-            . ./cf-space/variables
-            cd samples/MusicStore
-            cat createCloudFoundryServices.sh | sed "s/p-mysql pre-existing-plan/WhaleDB${SPACE} public/" | sh
-    - aggregate:
-      - do:
-        - task: publish-MusicStoreService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_musicstoreservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
-        - task: push-MusicStoreService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_musicstoreservice}
-          params:
-            APPNAME: musicstore
-      - do:
-        - task: publish-MusicStoreUI
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_musicstoreui}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
-        - task: push-MusicStoreUI
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_musicstoreui}
-          params:
-            APPNAME: musicui
-      - do:
-        - task: publish-OrderService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_orderservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/OrderService
-        - task: push-OrderService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_orderservice}
-          params:
-            APPNAME: orderprocessing
-      - do:
-        - task: publish-ShoppingCartService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_shoppingcartservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
-        - task: push-ShoppingCartService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_shoppingcartservice}
-          params:
-            APPNAME: shoppingcart
-    - task: test-app
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-musicstore.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: music-store-net451
-  plan:
-  - get: steeltoe-ci
-  - get: samples
-    resource: samples-music-store
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service-broker
-      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
-      params:
-        ADMIN_PASSWORD: {{whaledb_password}}
-    - task: create-cloudfoundry-services
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/cf-cli
-        inputs:
-        - name: cf-space
-        - name: samples
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            ./cf-space/login
-            cd samples/MusicStore
-            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/p-mysql 100mb-dev/' | sh
-    - aggregate:
-      - do:
-        - task: publish-MusicStoreService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_musicstoreservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
-        - task: push-MusicStoreService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_musicstoreservice}
-          params:
-            APPNAME: musicstore
-      - do:
-        - task: publish-MusicStoreUI
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_musicstoreui}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
-        - task: push-MusicStoreUI
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_musicstoreui}
-          params:
-            APPNAME: musicui
-      - do:
-        - task: publish-OrderService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_orderservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/OrderService
-        - task: push-OrderService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_orderservice}
-          params:
-            APPNAME: orderprocessing
-      - do:
-        - task: publish-ShoppingCartService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_shoppingcartservice}
-          params:
-            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
-        - task: push-ShoppingCartService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_shoppingcartservice}
-          params:
-            APPNAME: shoppingcart
-    - task: test-app
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: dgodd/ruby
-        inputs:
-        - name: steeltoe-ci
-        - name: cf-space
-        run:
-          path: sh
-          args:
-          - -euxc
-          - |
-            export SPACE=`cat cf-space/name`
-            ./steeltoe-ci/scripts/test-musicstore.rb
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: discovery-linux
-  plan:
-  - get: steeltoe-ci
-  - get: samples
-    resource: samples-discovery
-    trigger: true
-  - put: cf-space
-    resource: pez-linux
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-service-registry standard myDiscoveryService
-    - aggregate:
-      - do:
-        - task: publish-FortuneTellerService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_fortunetellerservice}
-          params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
-        - task: push-FortuneTellerService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_fortunetellerservice}
-          params:
-            APPNAME: fortuneService
-      - do:
-        - task: publish-FortuneTellerUI
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_fortunetellerui}
-          params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-        - task: push-FortuneTellerUI
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_fortunetellerui}
-          params:
-            APPNAME: fortuneui
-    - task: test-app
-      file: steeltoe-ci/tasks/test-with-ruby.yml
-      params:
-        FILENAME: discovery
-      attempts: 5
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: discovery-windows
-  plan:
-  - get: steeltoe-ci
-  - get: samples
-    resource: samples-discovery
-    trigger: true
-  - put: cf-space
-    resource: pez-windows
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-service-registry standard myDiscoveryService
-    - aggregate:
-      - do:
-        - task: publish-FortuneTellerService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_fortunetellerservice}
-          params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
-        - task: push-FortuneTellerService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_fortunetellerservice}
-          params:
-            APPNAME: fortuneService
-      - do:
-        - task: publish-FortuneTellerUI
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_fortunetellerui}
-          params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-        - task: push-FortuneTellerUI
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_fortunetellerui}
-          params:
-            APPNAME: fortuneui
-    - task: test-app
-      file: steeltoe-ci/tasks/test-with-ruby.yml
-      params:
-        FILENAME: discovery
-      attempts: 5
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
-
-- name: discovery-net451
-  plan:
-  - get: steeltoe-ci
-  - get: samples
-    resource: samples-discovery
-    trigger: true
-  - put: cf-space
-    resource: pez-net451
-  - do:
-    - task: create-service
-      file: steeltoe-ci/tasks/create-service.yml
-      params:
-        CREATE_SERVICE: p-service-registry standard myDiscoveryService
-    - aggregate:
-      - do:
-        - task: publish-FortuneTellerService
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_fortunetellerservice}
-          params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
-        - task: push-FortuneTellerService
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_fortunetellerservice}
-          params:
-            APPNAME: fortuneService
-      - do:
-        - task: publish-FortuneTellerUI
-          file: steeltoe-ci/tasks/publish.yml
-          output_mapping: {publish: publish_fortunetellerui}
-          params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
-        - task: push-FortuneTellerUI
-          attempts: 2
-          file: steeltoe-ci/tasks/push-app.yml
-          input_mapping: {publish: publish_fortunetellerui}
-          params:
-            APPNAME: fortuneui
-    - task: test-app
-      file: steeltoe-ci/tasks/test-with-ruby.yml
-      params:
-        FILENAME: discovery
-      attempts: 5
-    ensure:
-      task: delete-space
-      file: steeltoe-ci/tasks/delete-space.yml
+#---
+#resource_types:
+#- name: cf-space-resource
+#  type: docker-image
+#  source:
+#    repository: dgodd/cf-space-resource
+#
+#resources:
+#- name: steeltoe-ci
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/steeltoe-ci.git
+#    branch: master
+#- name: samples-rabbit
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/Rabbit/
+#    branch: dev
+#- name: samples-postgresql
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/PostgreSql/
+#    branch: dev
+#- name: samples-mysql-ef6
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/MySqlEF6/
+#    branch: dev
+#- name: samples-caching
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Caching/src/RedisCloudFoundry/
+#    branch: dev
+#- name: samples-config
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Configuration/src/AspDotNetCore/SimpleCloudFoundry
+#    branch: dev
+#- name: samples-mysql
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/MySql/
+#    branch: dev
+#- name: samples-oauth
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/OAuth/
+#    branch: dev
+#- name: samples-postgresql-efcore
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/PostgreEFCore/
+#    branch: dev
+#- name: samples-redis
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Connectors/src/Redis/
+#    branch: dev
+#- name: samples-security
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Security/src
+#    branch: dev
+#- name: samples-music-store
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - MusicStore/src
+#    branch: dev
+#- name: samples-discovery
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Samples.git
+#    paths:
+#    - Discovery/src
+#    branch: dev
+#- name: connectors
+#  type: git
+#  source:
+#    uri: https://github.com/SteelToeOSS/Connectors.git
+#    branch: dev
+#- name: uaa
+#  type: git
+#  source:
+#    uri: git://github.com/cloudfoundry/uaa.git
+#    branch: master
+#- name: pez-linux
+#  type: cf-space-resource
+#  source:
+#    target: {{pez_target}}
+#    username: {{pez_username}}
+#    password: {{pez_password}}
+#    organization: {{pez_org}}
+#    TYPE: LINUX
+#- name: pez-windows
+#  type: cf-space-resource
+#  source:
+#    target: {{pez_target}}
+#    username: {{pez_username}}
+#    password: {{pez_password}}
+#    organization: {{pez_org}}
+#    TYPE: WINDOWS
+#- name: pez-net451
+#  type: cf-space-resource
+#  source:
+#    target: {{pez_target}}
+#    username: {{pez_username}}
+#    password: {{pez_password}}
+#    organization: {{pez_org}}
+#    TYPE: NET451
+#
+#groups:
+#  - name: music-store
+#    jobs:
+#      - music-store-linux
+#      - music-store-windows
+#      - music-store-net451
+#  - name: postgresql
+#    jobs:
+#      - postgres-efcore-linux
+#      - postgres-efcore-windows
+#      - postgres-efcore-net451
+#      - postgres-linux
+#      - postgres-windows
+#      - postgres-net451
+#  - name: mysql
+#    jobs:
+#      - mysql-net451
+#      - mysql-ef6-net451
+#  - name: rabbit
+#    jobs:
+#      - rabbit-linux
+#      - rabbit-windows
+#      - rabbit-net451
+#  - name: oauth
+#    jobs:
+#      - oauth-linux
+#      - oauth-windows
+#      - oauth-net451
+#  - name: redis
+#    jobs:
+#      - redis-net451-windows
+#  - name: caching
+#    jobs:
+#      - caching-redis-net451-windows
+#  - name: config
+#    jobs:
+#      - config-windows
+#      - config-linux
+#      - config-net451
+#  - name: security
+#    jobs:
+#      - security-linux
+#      - security-windows
+#      - security-net451
+#  - name: discovery
+#    jobs:
+#      - discovery-linux
+#      - discovery-windows
+#      - discovery-net451
+#
+#jobs:
+#- name: postgres-efcore-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-postgresql-efcore
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: WhaleDB public myPostgres
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/PostgresData
+#        TEXT: <h3>Key2=Test Data 2
+#    ensure:
+#      do:
+#      - task: delete-space
+#        file: steeltoe-ci/tasks/delete-space.yml
+#      - task: unmap-service-broker
+#        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+#        params:
+#          ADMIN_PASSWORD: {{whaledb_password}}
+#
+#- name: postgres-efcore-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-postgresql-efcore
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: WhaleDB public myPostgres
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/PostgresData
+#        TEXT: <h3>Key2=Test Data 2
+#    ensure:
+#      do:
+#      - task: delete-space
+#        file: steeltoe-ci/tasks/delete-space.yml
+#      - task: unmap-service-broker
+#        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+#        params:
+#          ADMIN_PASSWORD: {{whaledb_password}}
+#
+#- name: postgres-efcore-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-postgresql-efcore
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: WhaleDB public myPostgres
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/PostgreEFCore/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/PostgresData
+#        TEXT: <h3>Key2=Test Data 2
+#    ensure:
+#      do:
+#      - task: delete-space
+#        file: steeltoe-ci/tasks/delete-space.yml
+#      - task: unmap-service-broker
+#        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+#        params:
+#          ADMIN_PASSWORD: {{whaledb_password}}
+#
+#- name: postgres-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-postgresql
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: WhaleDB public myPostgres
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/PostgreSql/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/PostgresData
+#        TEXT: <h3>Key1=Row1 Text
+#    ensure:
+#      do:
+#      - task: delete-space
+#        file: steeltoe-ci/tasks/delete-space.yml
+#      - task: unmap-service-broker
+#        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+#        params:
+#          ADMIN_PASSWORD: {{whaledb_password}}
+#
+#- name: postgres-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-postgresql
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: WhaleDB public myPostgres
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/PostgreSql/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/PostgresData
+#        TEXT: <h3>Key1=Row1 Text
+#    ensure:
+#      do:
+#      - task: delete-space
+#        file: steeltoe-ci/tasks/delete-space.yml
+#      - task: unmap-service-broker
+#        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+#        params:
+#          ADMIN_PASSWORD: {{whaledb_password}}
+#
+#- name: postgres-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-postgresql
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: WhaleDB public myPostgres
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/PostgreSql/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/PostgresData
+#        TEXT: <h3>Key1=Row1 Text
+#    ensure:
+#      do:
+#      - task: delete-space
+#        file: steeltoe-ci/tasks/delete-space.yml
+#      - task: unmap-service-broker
+#        file: steeltoe-ci/tasks/unmap-whaledb-service-broker.yml
+#        params:
+#          ADMIN_PASSWORD: {{whaledb_password}}
+#
+#- name: rabbit-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-rabbit
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-rabbitmq standard myRabbitService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/Rabbit/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+#        URL_PATH: /
+#        TEXT: <h3>Message=Some exciting text
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: rabbit-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-rabbit
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-rabbitmq standard myRabbitService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/Rabbit/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+#        URL_PATH: /
+#        TEXT: <h3>Message=Some exciting text
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: rabbit-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-rabbit
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-rabbitmq standard myRabbitService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/Rabbit/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        PRECOND: curl -k -X POST -F 'Message=Some exciting text' https://$URL/Rabbit/Send
+#        URL_PATH: /
+#        TEXT: <h3>Message=Some exciting text
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: mysql-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-mysql
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-mysql 100mb-dev myMySqlService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/MySql/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/MySqlData
+#        TEXT: <h3>Key2=Row2 Text
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: mysql-ef6-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-mysql-ef6
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-mysql 100mb-dev myMySqlService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/MySql/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/MySqlData
+#        TEXT: <h3>Key1=Row1 Text
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: oauth-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-oauth
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/OAuth/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/OAuthOptions
+#        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#
+#- name: oauth-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-oauth
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/OAuth/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/OAuthOptions
+#        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: oauth-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-oauth
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_CUPS: 'myOAuthService -p {"client_id":"myTestApp","client_secret":"myTestApp","uri":"uaa://login.run.pez.pivotal.io"}'
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/OAuth/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/OAuthOptions
+#        TEXT: <h4>AccessTokenUrl = https://login.run.pez.pivotal.io/oauth/token
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: redis-net451-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-redis
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-redis shared-vm myRedisService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Connectors/src/Redis/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/CacheData
+#        TEXT: <h3>Key1=Key1Value
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: caching-redis-net451-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-caching
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-redis shared-vm myRedisService
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Caching/src/RedisCloudFoundry/
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/CacheData
+#        TEXT: <h3>Key1=Key1Value
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: config-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-config
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#      params:
+#        APPNAME: foo
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/ConfigServer
+#        TEXT: <h4>Property info.description=Spring Cloud Samples
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: config-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-config
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#      params:
+#        APPNAME: foo
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/ConfigServer
+#        TEXT: <h4>Property bar=spam
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: config-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-config
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-config-server standard myConfigServer -c ./samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry/config-server.json
+#    - task: publish
+#      file: steeltoe-ci/tasks/publish.yml
+#      params:
+#        SOURCE_DIR: samples/Configuration/src/AspDotNetCore/SimpleCloudFoundry
+#    - task: push-app
+#      attempts: 2
+#      file: steeltoe-ci/tasks/push-app.yml
+#      params:
+#        APPNAME: foo
+#    - task: test-app
+#      attempts: 5
+#      file: steeltoe-ci/tasks/test-app.yml
+#      params:
+#        URL_PATH: /Home/ConfigServer
+#        TEXT: <h4>Property info.description=Spring Cloud Samples
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: security-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-security
+#    trigger: true
+#  - get: uaa
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: push-uaa
+#      file: steeltoe-ci/tasks/push-uaa.yml
+#    - task: setup-uaa
+#      file: steeltoe-ci/tasks/setup-uaa.yml
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
+#    - aggregate:
+#      - do:
+#        - task: publish-signon
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_signon}
+#          params:
+#            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
+#        - task: push-signon
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_signon}
+#          params:
+#            APPNAME: single-signon
+#      - do:
+#        - task: publish-jwtauth
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_jwtauth}
+#          params:
+#            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
+#            MANIFEST_YAML: manifest.yml
+#            FRAMEWORK: netcoreapp1.0
+#            RUNTIME: ubuntu.14.04-x64
+#        - task: push-jwtauth
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_jwtauth}
+#          params:
+#            STACK: cflinuxfs2
+#            APPNAME: jwtauth
+#    - task: test-app
+#      attempts: 5
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/ruby
+#        inputs:
+#        - name: steeltoe-ci
+#        - name: cf-space
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            export SPACE=`cat cf-space/name`
+#            ./steeltoe-ci/scripts/test-security.rb
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: security-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-security
+#    trigger: true
+#  - get: uaa
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: push-uaa
+#      file: steeltoe-ci/tasks/push-uaa.yml
+#    - task: setup-uaa
+#      file: steeltoe-ci/tasks/setup-uaa.yml
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
+#    - aggregate:
+#      - do:
+#        - task: publish-signon
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_signon}
+#          params:
+#            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
+#        - task: push-signon
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_signon}
+#          params:
+#            APPNAME: single-signon
+#      - do:
+#        - task: publish-jwtauth
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_jwtauth}
+#          params:
+#            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
+#            MANIFEST_YAML: manifest-windows.yml
+#            FRAMEWORK: netcoreapp1.0
+#            RUNTIME: win7-x64
+#        - task: push-jwtauth
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_jwtauth}
+#          params:
+#            STACK: windows2012R2
+#            APPNAME: jwtauth
+#    - task: test-app
+#      attempts: 5
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/ruby
+#        inputs:
+#        - name: steeltoe-ci
+#        - name: cf-space
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            export SPACE=`cat cf-space/name`
+#            ./steeltoe-ci/scripts/test-security.rb
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: security-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: connectors
+#    trigger: true
+#  - get: samples
+#    resource: samples-security
+#    trigger: true
+#  - get: uaa
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: push-uaa
+#      file: steeltoe-ci/tasks/push-uaa.yml
+#    - task: setup-uaa
+#      file: steeltoe-ci/tasks/setup-uaa.yml
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_CUPS: 'myOAuthService -p {"client_id":"${SPACE}TestApp","client_secret":"${SPACE}TestApp","uri":"uaa://myuaa-${SPACE}.cfapps.pez.pivotal.io"}'
+#    - aggregate:
+#      - do:
+#        - task: publish-signon
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_signon}
+#          params:
+#            SOURCE_DIR: samples/Security/src/CloudFoundrySingleSignon
+#        - task: push-signon
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_signon}
+#          params:
+#            APPNAME: single-signon
+#      - do:
+#        - task: publish-jwtauth
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_jwtauth}
+#          params:
+#            SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
+#            MANIFEST_YAML: manifest-windows.yml
+#            FRAMEWORK: net451
+#            RUNTIME: win7-x64
+#        - task: push-jwtauth
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_jwtauth}
+#          params:
+#            STACK: windows2012R2
+#            APPNAME: jwtauth
+#    - task: test-app
+#      attempts: 5
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/ruby
+#        inputs:
+#        - name: steeltoe-ci
+#        - name: cf-space
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            export SPACE=`cat cf-space/name`
+#            ./steeltoe-ci/scripts/test-security.rb
+#    ensure:
+#      task: teardown-uaa
+#      file: steeltoe-ci/tasks/teardown-uaa.yml
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: music-store-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: samples
+#    resource: samples-music-store
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-cloudfoundry-services
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/cf-cli
+#        inputs:
+#        - name: cf-space
+#        - name: samples
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            ./cf-space/login
+#            . ./cf-space/variables
+#            cd samples/MusicStore
+#            cat createCloudFoundryServices.sh | sed "s/p-mysql pre-existing-plan/WhaleDB${SPACE} public/" | sh
+#    - aggregate:
+#      - do:
+#        - task: publish-MusicStoreService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_musicstoreservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
+#        - task: push-MusicStoreService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_musicstoreservice}
+#          params:
+#            APPNAME: musicstore
+#      - do:
+#        - task: publish-MusicStoreUI
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_musicstoreui}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
+#        - task: push-MusicStoreUI
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_musicstoreui}
+#          params:
+#            APPNAME: musicui
+#      - do:
+#        - task: publish-OrderService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_orderservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/OrderService
+#        - task: push-OrderService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_orderservice}
+#          params:
+#            APPNAME: orderprocessing
+#      - do:
+#        - task: publish-ShoppingCartService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_shoppingcartservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
+#        - task: push-ShoppingCartService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_shoppingcartservice}
+#          params:
+#            APPNAME: shoppingcart
+#    - task: test-app
+#      attempts: 5
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/ruby
+#        inputs:
+#        - name: steeltoe-ci
+#        - name: cf-space
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            export SPACE=`cat cf-space/name`
+#            ./steeltoe-ci/scripts/test-musicstore.rb
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: music-store-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: samples
+#    resource: samples-music-store
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-cloudfoundry-services
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/cf-cli
+#        inputs:
+#        - name: cf-space
+#        - name: samples
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            ./cf-space/login
+#            . ./cf-space/variables
+#            cd samples/MusicStore
+#            cat createCloudFoundryServices.sh | sed "s/p-mysql pre-existing-plan/WhaleDB${SPACE} public/" | sh
+#    - aggregate:
+#      - do:
+#        - task: publish-MusicStoreService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_musicstoreservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
+#        - task: push-MusicStoreService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_musicstoreservice}
+#          params:
+#            APPNAME: musicstore
+#      - do:
+#        - task: publish-MusicStoreUI
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_musicstoreui}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
+#        - task: push-MusicStoreUI
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_musicstoreui}
+#          params:
+#            APPNAME: musicui
+#      - do:
+#        - task: publish-OrderService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_orderservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/OrderService
+#        - task: push-OrderService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_orderservice}
+#          params:
+#            APPNAME: orderprocessing
+#      - do:
+#        - task: publish-ShoppingCartService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_shoppingcartservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
+#        - task: push-ShoppingCartService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_shoppingcartservice}
+#          params:
+#            APPNAME: shoppingcart
+#    - task: test-app
+#      attempts: 5
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/ruby
+#        inputs:
+#        - name: steeltoe-ci
+#        - name: cf-space
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            export SPACE=`cat cf-space/name`
+#            ./steeltoe-ci/scripts/test-musicstore.rb
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: music-store-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: samples
+#    resource: samples-music-store
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service-broker
+#      file: steeltoe-ci/tasks/create-whaledb-service-broker.yml
+#      params:
+#        ADMIN_PASSWORD: {{whaledb_password}}
+#    - task: create-cloudfoundry-services
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/cf-cli
+#        inputs:
+#        - name: cf-space
+#        - name: samples
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            ./cf-space/login
+#            cd samples/MusicStore
+#            cat createCloudFoundryServices.sh | sed 's/p-mysql pre-existing-plan/p-mysql 100mb-dev/' | sh
+#    - aggregate:
+#      - do:
+#        - task: publish-MusicStoreService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_musicstoreservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/MusicStoreService
+#        - task: push-MusicStoreService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_musicstoreservice}
+#          params:
+#            APPNAME: musicstore
+#      - do:
+#        - task: publish-MusicStoreUI
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_musicstoreui}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/MusicStoreUI
+#        - task: push-MusicStoreUI
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_musicstoreui}
+#          params:
+#            APPNAME: musicui
+#      - do:
+#        - task: publish-OrderService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_orderservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/OrderService
+#        - task: push-OrderService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_orderservice}
+#          params:
+#            APPNAME: orderprocessing
+#      - do:
+#        - task: publish-ShoppingCartService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_shoppingcartservice}
+#          params:
+#            SOURCE_DIR: samples/MusicStore/src/ShoppingCartService
+#        - task: push-ShoppingCartService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_shoppingcartservice}
+#          params:
+#            APPNAME: shoppingcart
+#    - task: test-app
+#      attempts: 5
+#      config:
+#        platform: linux
+#        image_resource:
+#          type: docker-image
+#          source:
+#            repository: dgodd/ruby
+#        inputs:
+#        - name: steeltoe-ci
+#        - name: cf-space
+#        run:
+#          path: sh
+#          args:
+#          - -euxc
+#          - |
+#            export SPACE=`cat cf-space/name`
+#            ./steeltoe-ci/scripts/test-musicstore.rb
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: discovery-linux
+#  plan:
+#  - get: steeltoe-ci
+#  - get: samples
+#    resource: samples-discovery
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-linux
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-service-registry standard myDiscoveryService
+#    - aggregate:
+#      - do:
+#        - task: publish-FortuneTellerService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_fortunetellerservice}
+#          params:
+#            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+#        - task: push-FortuneTellerService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_fortunetellerservice}
+#          params:
+#            APPNAME: fortuneService
+#      - do:
+#        - task: publish-FortuneTellerUI
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_fortunetellerui}
+#          params:
+#            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+#        - task: push-FortuneTellerUI
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_fortunetellerui}
+#          params:
+#            APPNAME: fortuneui
+#    - task: test-app
+#      file: steeltoe-ci/tasks/test-with-ruby.yml
+#      params:
+#        FILENAME: discovery
+#      attempts: 5
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: discovery-windows
+#  plan:
+#  - get: steeltoe-ci
+#  - get: samples
+#    resource: samples-discovery
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-windows
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-service-registry standard myDiscoveryService
+#    - aggregate:
+#      - do:
+#        - task: publish-FortuneTellerService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_fortunetellerservice}
+#          params:
+#            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+#        - task: push-FortuneTellerService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_fortunetellerservice}
+#          params:
+#            APPNAME: fortuneService
+#      - do:
+#        - task: publish-FortuneTellerUI
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_fortunetellerui}
+#          params:
+#            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+#        - task: push-FortuneTellerUI
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_fortunetellerui}
+#          params:
+#            APPNAME: fortuneui
+#    - task: test-app
+#      file: steeltoe-ci/tasks/test-with-ruby.yml
+#      params:
+#        FILENAME: discovery
+#      attempts: 5
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml
+#
+#- name: discovery-net451
+#  plan:
+#  - get: steeltoe-ci
+#  - get: samples
+#    resource: samples-discovery
+#    trigger: true
+#  - put: cf-space
+#    resource: pez-net451
+#  - do:
+#    - task: create-service
+#      file: steeltoe-ci/tasks/create-service.yml
+#      params:
+#        CREATE_SERVICE: p-service-registry standard myDiscoveryService
+#    - aggregate:
+#      - do:
+#        - task: publish-FortuneTellerService
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_fortunetellerservice}
+#          params:
+#            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+#        - task: push-FortuneTellerService
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_fortunetellerservice}
+#          params:
+#            APPNAME: fortuneService
+#      - do:
+#        - task: publish-FortuneTellerUI
+#          file: steeltoe-ci/tasks/publish.yml
+#          output_mapping: {publish: publish_fortunetellerui}
+#          params:
+#            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+#        - task: push-FortuneTellerUI
+#          attempts: 2
+#          file: steeltoe-ci/tasks/push-app.yml
+#          input_mapping: {publish: publish_fortunetellerui}
+#          params:
+#            APPNAME: fortuneui
+#    - task: test-app
+#      file: steeltoe-ci/tasks/test-with-ruby.yml
+#      params:
+#        FILENAME: discovery
+#      attempts: 5
+#    ensure:
+#      task: delete-space
+#      file: steeltoe-ci/tasks/delete-space.yml

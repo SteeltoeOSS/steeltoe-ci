@@ -1,22 +1,22 @@
----
-platform: linux
-image_resource:
-  type: docker-image
-  source:
-    repository: dgodd/dotnet
-inputs:
-- name: samples
-- name: cf-space
-outputs:
-- name: publish
-run:
-  path: sh
-  args:
-  - -exc
-  - |
-    . ./cf-space/variables
-    export PUBLISH_DIR=$PWD/publish
-    cp $SOURCE_DIR/$MANIFEST_YAML $PUBLISH_DIR/
-    cd $SOURCE_DIR
-    dotnet restore
-    dotnet publish --output $PUBLISH_DIR --configuration Release --framework $FRAMEWORK --runtime $RUNTIME
+#---
+#platform: linux
+#image_resource:
+#  type: docker-image
+#  source:
+#    repository: dgodd/dotnet
+#inputs:
+#- name: samples
+#- name: cf-space
+#outputs:
+#- name: publish
+#run:
+#  path: sh
+#  args:
+#  - -exc
+#  - |
+#    . ./cf-space/variables
+#    export PUBLISH_DIR=$PWD/publish
+#    cp $SOURCE_DIR/$MANIFEST_YAML $PUBLISH_DIR/
+#    cd $SOURCE_DIR
+#    dotnet restore
+#    dotnet publish --output $PUBLISH_DIR --configuration Release --framework $FRAMEWORK --runtime $RUNTIME
