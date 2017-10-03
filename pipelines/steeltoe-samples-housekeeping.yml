@@ -8,7 +8,7 @@ jobs:
       image_resource:
         type: docker-image
         source:
-          repository: dgodd/cf-cli
+          repository: steeltoeoss/cf-cli
       params:
         CF_TARGET: {{pez_target}}
         CF_USERNAME: {{pez_username}}
