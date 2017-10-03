@@ -16,7 +16,7 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     paths:
-    - Connectors/src/Rabbit/
+    - Connectors/src/AspDotNetCore/Rabbit/
     branch: dev
 - name: samples-postgresql
   type: git
@@ -445,7 +445,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/Rabbit/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/Rabbit/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
@@ -478,7 +478,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/Rabbit/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/Rabbit/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
