@@ -1395,7 +1395,7 @@ jobs:
           file: steeltoe-ci/tasks/publish.yml
           output_mapping: {publish: publish_fortunetellerservice}
           params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+            SOURCE_DIR: samples/Discovery/src/AspDotNetCore/Fortune-Teller-Service
         - task: push-FortuneTellerService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
@@ -1407,7 +1407,7 @@ jobs:
           file: steeltoe-ci/tasks/publish.yml
           output_mapping: {publish: publish_fortunetellerui}
           params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+            SOURCE_DIR: samples/Discovery/src/AspDotNetCore/Fortune-Teller-UI
         - task: push-FortuneTellerUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
@@ -1442,7 +1442,7 @@ jobs:
           file: steeltoe-ci/tasks/publish.yml
           output_mapping: {publish: publish_fortunetellerservice}
           params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+            SOURCE_DIR: samples/Discovery/src/AspDotNetCore/Fortune-Teller-Service
         - task: push-FortuneTellerService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
@@ -1454,7 +1454,7 @@ jobs:
           file: steeltoe-ci/tasks/publish.yml
           output_mapping: {publish: publish_fortunetellerui}
           params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+            SOURCE_DIR: samples/Discovery/src/AspDotNetCore/Fortune-Teller-UI
         - task: push-FortuneTellerUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
@@ -1489,7 +1489,7 @@ jobs:
           file: steeltoe-ci/tasks/publish.yml
           output_mapping: {publish: publish_fortunetellerservice}
           params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-Service
+            SOURCE_DIR: samples/Discovery/src/AspDotNetCore/Fortune-Teller-Service
         - task: push-FortuneTellerService
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
@@ -1501,7 +1501,7 @@ jobs:
           file: steeltoe-ci/tasks/publish.yml
           output_mapping: {publish: publish_fortunetellerui}
           params:
-            SOURCE_DIR: samples/Discovery/src/Fortune-Teller-UI
+            SOURCE_DIR: samples/Discovery/src/AspDotNetCore/Fortune-Teller-UI
         - task: push-FortuneTellerUI
           attempts: 2
           file: steeltoe-ci/tasks/push-app.yml
