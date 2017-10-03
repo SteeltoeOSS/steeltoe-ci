@@ -30,7 +30,7 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     paths:
-    - Connectors/src/MySqlEF6/
+    - Connectors/src/AspDotNetCore/MySqlEF6/
     branch: dev
 - name: samples-caching
   type: git
@@ -51,7 +51,7 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     paths:
-    - Connectors/src/MySql/
+    - Connectors/src/AspDotNetCore/MySql/
     branch: dev
 - name: samples-oauth
   type: git
@@ -544,7 +544,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/MySql/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/MySql/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
@@ -576,7 +576,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/MySql/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/MySql/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
