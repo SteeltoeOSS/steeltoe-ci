@@ -3,7 +3,7 @@ resource_types:
 - name: cf-space-resource
   type: docker-image
   source:
-    repository: dgodd/cf-space-resource
+    repository: steeltoeoss/cf-space-resource
 
 resources:
 - name: steeltoe-ci
@@ -909,7 +909,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/ruby
+            repository: steeltoeoss/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
@@ -980,7 +980,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/ruby
+            repository: steeltoeoss/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
@@ -1051,7 +1051,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/ruby
+            repository: steeltoeoss/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
@@ -1087,7 +1087,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/cf-cli
+            repository: steeltoeoss/cf-cli
         inputs:
         - name: cf-space
         - name: samples
@@ -1156,7 +1156,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/ruby
+            repository: steeltoeoss/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
@@ -1190,7 +1190,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/cf-cli
+            repository: steeltoeoss/cf-cli
         inputs:
         - name: cf-space
         - name: samples
@@ -1259,7 +1259,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/ruby
+            repository: steeltoeoss/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
@@ -1293,7 +1293,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/cf-cli
+            repository: steeltoeoss/cf-cli
         inputs:
         - name: cf-space
         - name: samples
@@ -1361,7 +1361,7 @@ jobs:
         image_resource:
           type: docker-image
           source:
-            repository: dgodd/ruby
+            repository: steeltoeoss/ruby
         inputs:
         - name: steeltoe-ci
         - name: cf-space
