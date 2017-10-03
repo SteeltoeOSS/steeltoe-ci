@@ -1,4 +1,4 @@
-FROM dgodd/cf-cli:latest
+FROM steeltoeoss/cf-cli:latest
 
 ENV TMPDIR /tmp
 RUN mkdir -p /opt/resource/
