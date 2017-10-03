@@ -1,11 +1,11 @@
-#---
-#platform: linux
-#image_resource:
-#  type: docker-image
-#  source:
-#    repository: dgodd/cf-cli
-#inputs:
-#- name: steeltoe-ci
-#- name: cf-space
-#run:
-#  path: steeltoe-ci/scripts/delete-space.sh
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: steeltoeoss/cf-cli
+inputs:
+- name: steeltoe-ci
+- name: cf-space
+run:
+  path: steeltoe-ci/scripts/delete-space.sh

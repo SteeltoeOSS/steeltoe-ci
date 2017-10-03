@@ -1,21 +1,21 @@
-#---
-#platform: linux
-#image_resource:
-#  type: docker-image
-#  source:
-#    repository: dgodd/dotnet
-#inputs:
-#- name: cf-space
-#- name: publish
-#outputs:
-#- name: cf-push
-#run:
-#  path: sh
-#  args:
-#  - -exc
-#  - |
-#    ./cf-space/login
-#    . ./cf-space/variables
-#    export APPNAME=${APPNAME:-testapp}
-#    cf push $APPNAME -s $STACK -f publish/$MANIFEST_YAML -p publish --hostname $APPNAME-$SPACE
-#    cf app $APPNAME | grep '^urls: ' | cut -d ' ' -f 2 > cf-push/url
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: steeltoeoss/dotnet
+inputs:
+- name: cf-space
+- name: publish
+outputs:
+- name: cf-push
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    ./cf-space/login
+    . ./cf-space/variables
+    export APPNAME=${APPNAME:-testapp}
+    cf push $APPNAME -s $STACK -f publish/$MANIFEST_YAML -p publish --hostname $APPNAME-$SPACE
+    cf app $APPNAME | grep '^urls: ' | cut -d ' ' -f 2 > cf-push/url
