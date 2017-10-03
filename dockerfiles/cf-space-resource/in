@@ -33,7 +33,7 @@ if [ $TYPE == "LINUX" ]; then
 fi
 if [ $TYPE == "WINDOWS" ]; then
   echo "export MANIFEST_YAML=manifest-windows.yml" >> $DESTINATION/variables
-  echo "export FRAMEWORK=netcoreapp1.0" >> $DESTINATION/variables
+  echo "export FRAMEWORK=netcoreapp2.0" >> $DESTINATION/variables
   echo "export RUNTIME=win7-x64" >> $DESTINATION/variables
   echo "export STACK=windows2012R2" >> $DESTINATION/variables
 fi
