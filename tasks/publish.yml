@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: steeltoeoss/dotnet
+    repository: steeltoeoss/dotnet2.0
 inputs:
 - name: samples
 - name: cf-space
