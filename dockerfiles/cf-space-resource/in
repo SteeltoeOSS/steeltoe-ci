@@ -27,7 +27,7 @@ echo "export SPACE=$SPACE" > $DESTINATION/variables
 
 if [ $TYPE == "LINUX" ]; then
   echo "export MANIFEST_YAML=manifest.yml" >> $DESTINATION/variables
-  echo "export FRAMEWORK=netcoreapp1.0" >> $DESTINATION/variables
+  echo "export FRAMEWORK=netcoreapp2.0" >> $DESTINATION/variables
   echo "export RUNTIME=ubuntu.14.04-x64" >> $DESTINATION/variables
   echo "export STACK=cflinuxfs2" >> $DESTINATION/variables
 fi
