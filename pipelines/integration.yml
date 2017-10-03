@@ -893,7 +893,7 @@ jobs:
           params:
             SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
             MANIFEST_YAML: manifest.yml
-            FRAMEWORK: netcoreapp1.0
+            FRAMEWORK: netcoreapp2.0
             RUNTIME: ubuntu.14.04-x64
         - task: push-jwtauth
           attempts: 2
@@ -964,7 +964,7 @@ jobs:
           params:
             SOURCE_DIR: samples/Security/src/CloudFoundryJwtAuthentication
             MANIFEST_YAML: manifest-windows.yml
-            FRAMEWORK: netcoreapp1.0
+            FRAMEWORK: netcoreapp2.0
             RUNTIME: win7-x64
         - task: push-jwtauth
           attempts: 2
