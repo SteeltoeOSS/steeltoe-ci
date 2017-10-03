@@ -72,7 +72,7 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     paths:
-    - Connectors/src/Redis/
+    - Connectors/src/AspDotNetCore/Redis/
     branch: dev
 - name: samples-security
   type: git
@@ -705,7 +705,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/Redis/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/Redis/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
