@@ -58,7 +58,7 @@ resources:
   source:
     uri: https://github.com/SteelToeOSS/Samples.git
     paths:
-    - Connectors/src/OAuth/
+    - Connectors/src/AspDotNetCore/OAuth/
     branch: dev
 - name: samples-postgresql-efcore
   type: git
@@ -608,7 +608,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/OAuth/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/OAuth/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
@@ -641,7 +641,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/OAuth/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/OAuth/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
@@ -673,7 +673,7 @@ jobs:
     - task: publish
       file: steeltoe-ci/tasks/publish.yml
       params:
-        SOURCE_DIR: samples/Connectors/src/OAuth/
+        SOURCE_DIR: samples/Connectors/src/AspDotNetCore/OAuth/
     - task: push-app
       attempts: 2
       file: steeltoe-ci/tasks/push-app.yml
