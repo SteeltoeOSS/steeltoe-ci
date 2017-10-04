@@ -11,7 +11,7 @@ USERNAME=`jq -r '.source.username' < $payload`
 PASSWORD=`jq -r '.source.password' < $payload`
 ORGANIZATION=`jq -r '.source.organization' < $payload`
 
-cf login -a $TARGET -u $USERNAME -p $PASSWORD --skip-ssl-validation -o $ORGANIZATION -s development
+cf login -a $TARGET -u $USERNAME -p $PASSWORD --skip-ssl-validation -o $ORGANIZATION
 
 SPACE=$(pwgen -1 | awk '{print tolower($0)}')
 cf create-space ${SPACE} -o $ORGANIZATION
