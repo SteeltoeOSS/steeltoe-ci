@@ -27,6 +27,8 @@ Else {
     $env:STEELTOE_DASH_VERSION_SUFFIX = ""
 }
 
+$scriptPath = Split-Path $script:MyInvocation.MyCommand.Path
+
 Write-Host "Steeltoe version:" $env:STEELTOE_VERSION
 Write-Host "Steeltoe version suffix:" $(If($env:STEELTOE_VERSION_SUFFIX) { $env:STEELTOE_VERSION_SUFFIX } Else { "N/A" })
 
@@ -71,7 +73,7 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
     $ProjectTime = New-Object -TypeName System.Diagnostics.Stopwatch
     $ProjectTime.Start()
     # build the clone command as a string to then execute so the branch filter works
-    $cloneString = "git clone $env:BranchFilter https://github.com/$_.git"
+    $cloneString = "git clone -q $env:BranchFilter https://github.com/$_.git"
     Write-Host "Cloning repository with this command: " $cloneString
     Invoke-Expression $cloneString
 
@@ -134,7 +136,6 @@ ForEach ($_ in $env:ProcessTimes.Split(';')) {
 }
 
 If ($PackageDestination) {
-    $scriptPath = Split-Path $script:MyInvocation.MyCommand.Path
     $PublishCommand = "$scriptPath\push_packages.ps1 ""$(Get-Location)\artifacts"" ""*$Steeltoe_Version_To_Build*"" ""$PackageDestination"""
     Write-Host "Calling publish command: $PublishCommand"
     Invoke-Expression $PublishCommand
