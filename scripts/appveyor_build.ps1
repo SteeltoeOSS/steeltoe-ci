@@ -1,3 +1,5 @@
+dotnet restore
+
 Set-Location src
 If ($env:ProjectList -eq $null){
 	Write-Host "env:ProjectList was not defined - discover and build projects alphabetically"
@@ -7,8 +9,6 @@ If ($env:ProjectList -eq $null){
 ForEach ($_ in $env:ProjectList.Split(' ')) {
 	Write-Host "Now building $_..."
 	Set-Location $_
-
-	dotnet restore
 
 	# if there is a tag with the latest commit don't include symbols or source
 	If ($env:APPVEYOR_REPO_TAG_NAME)

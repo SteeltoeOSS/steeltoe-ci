@@ -32,8 +32,9 @@ If ($env:APPVEYOR_REPO_BRANCH -eq "master") {
 	$env:PropsVersion = "-master"
 }
 ElseIf ($env:APPVEYOR_REPO_BRANCH -eq "dev") {
-	Write-Host "Use dependencies from nuget.org and https://www.myget.org/F/steeltoedev/api/v3/index.json"
-	nuget sources add -Name Steeltoe -Source https://www.myget.org/F/steeltoedev/api/v3/index.json
+	# this feed is already in the nuget.config at the root of each repo...
+	#Write-Host "Use dependencies from nuget.org and https://www.myget.org/F/steeltoedev/api/v3/index.json"
+	#nuget sources add -Name Steeltoe -Source https://www.myget.org/F/steeltoedev/api/v3/index.json
 	$env:PropsVersion = "-dev"
 	$env:BUILD_TYPE = "Debug"
 }
