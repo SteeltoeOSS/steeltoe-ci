@@ -17,7 +17,6 @@ If (-Not $env:STEELTOE_VERSION)
 }
 $Version_To_Set = $env:STEELTOE_VERSION + $env:STEELTOE_DASH_VERSION_SUFFIX
 
-
 If (-Not $env:SteeltoeRepositoryList) {
     Write-Information "Steeltoe repository list not set in Environment, using complete list"
     $s = "SteeltoeOSS"
@@ -73,6 +72,9 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
             $xmlContent.OuterXml | Out-File "config/versions-$env:APPVEYOR_REPO_BRANCH.props"
             git add config/versions-$env:APPVEYOR_REPO_BRANCH.props
             git commit -m "Update versions-$env:APPVEYOR_REPO_BRANCH.props"
+
+            Write-Host "Before we push this change, wait a bit for MyGet to index what we just published so the build we're about to trigger doesn't fail"
+            Start-Sleep -s 30
             git push --porcelain
         }
     }
@@ -82,7 +84,6 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
     }
     Set-Location ..
     $ProjectTime.Stop()
-    Write-Host "Process time for $_ :" $ProjectTime.Elapsed.ToString()
     $env:ProcessTimes += $_ + ":" + $ProjectTime.Elapsed.ToString() + ";"
 }
 Set-Location ..
