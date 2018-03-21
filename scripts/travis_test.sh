@@ -3,6 +3,7 @@
 # Run unit tests
 for d in ./test/*.Test; do
     cd $d
+    echo "Running tests in $d"
     dotnet restore
     dotnet xunit -verbose -framework netcoreapp2.0
     cd ../../

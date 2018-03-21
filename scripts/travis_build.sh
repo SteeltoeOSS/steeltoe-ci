@@ -4,6 +4,6 @@
 for d in ./src/*; do
     cd $d
     dotnet restore
-    dotnet build
+    dotnet build --f netcoreapp2.0
     cd ../../
 done

@@ -1,10 +1,7 @@
 Param(
     [Parameter(Mandatory=$true)]
     [string]$Steeltoe_Version_To_Build,
-    [string]$BuildType,
-    [string]$RepositoryList,
-    [string]$PackageDestination,
-    [bool]$RunUnitTests = $False
+    [switch]$BuildDebug
  )
 
 # Validate/set initial parameters
@@ -12,10 +9,6 @@ $env:STEELTOE_VERSION = $Steeltoe_Version_To_Build.Split("-")[0]
 # Steeltoe version should be 5+ characters and include 2 periods
 If ($env:STEELTOE_VERSION.length -lt 5 -or ($env:STEELTOE_VERSION.ToCharArray() | Where-Object {$_ -eq '.'} | Measure-Object).Count -ne 2) {
     Write-Error "Please use a version format of 1.2.3"
-    return -1
-}
-If ($PackageDestination -and -Not $env:NuGetApiKey) {
-    Write-Error "Package upload destination has been set, but uploading will fail because you haven't set env:NuGetApiKey!"
     return -1
 }
 If ($Steeltoe_Version_To_Build.Split("-")[1]) {
@@ -32,16 +25,18 @@ $scriptPath = Split-Path $script:MyInvocation.MyCommand.Path
 Write-Host "Steeltoe version:" $env:STEELTOE_VERSION
 Write-Host "Steeltoe version suffix:" $(If($env:STEELTOE_VERSION_SUFFIX) { $env:STEELTOE_VERSION_SUFFIX } Else { "N/A" })
 
-If (-Not $BuildType) {
+If (-Not $BuildDebug) {
     Write-Warning "Build type not set. Defaulting to config:Release branch:master"
     $env:BUILD_TYPE = "Release"
     $env:BranchFilter = "--single-branch -b master"
 }
 Else {
+    Write-Host "Debug build specified, we'll use default branches as a side effect"
     $env:BUILD_TYPE = $BuildType
+    $env:BUILD_TYPE = "Debug"
     $env:BranchFilter = ""
 }
-If (-Not $RepositoryList) {
+If (-Not $env:SteeltoeRepositoryList) {
     Write-Information "Steeltoe repository list not set in Environment, using complete list"
     $s = "SteeltoeOSS"
     $p = "pivotal-cf"
@@ -49,8 +44,7 @@ If (-Not $RepositoryList) {
                                         "$s/discovery $p/spring-cloud-dotnet-discovery $s/security $s/management $s/circuitbreaker"
 }
 Else {
-    Write-Information "Using repository list passed in: $RepositoryList"
-    $env:SteeltoeRepositoryList = $RepositoryList
+    Write-Information "Using repository list from environment: $env:SteeltoeRepositoryList"
 }
 
 # start the clock
@@ -66,7 +60,7 @@ Remove-Item workspace -Force -Recurse -ErrorAction SilentlyContinue
 [int]$env:TestErrors = 0
 $env:ProcessTimes = ""
 
-mkdir workspace
+mkdir workspace -Force
 Set-Location workspace
 
 ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
@@ -96,7 +90,7 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
         return -1
     }
 
-    If ($RunUnitTests) {
+    If ($env:RunUnitTests) {
         Set-Location test
         # run tests in each project in the test folder where the folder is named .test
         # this filter will skip integration tests that generally assume another thing (like config server) is running
@@ -122,6 +116,7 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
         Set-Location ..
     Set-Location ..
     $ProjectTime.Stop()
+    Write-Host "Process time for $_ :" $ProjectTime.Elapsed.ToString()
     $env:ProcessTimes += $_ + ":" + $ProjectTime.Elapsed.ToString() + ";"
 }
 Set-Location ..
@@ -133,12 +128,6 @@ nuget sources remove -Name artifacts
 Write-Host "Package build process times:"
 ForEach ($_ in $env:ProcessTimes.Split(';')) { 
     Write-Host $_ 
-}
-
-If ($PackageDestination) {
-    $PublishCommand = "$scriptPath\push_packages.ps1 ""$(Get-Location)\artifacts"" ""*$Steeltoe_Version_To_Build*"" ""$PackageDestination"""
-    Write-Host "Calling publish command: $PublishCommand"
-    Invoke-Expression $PublishCommand
 }
 
 $TotalTime.Stop()
