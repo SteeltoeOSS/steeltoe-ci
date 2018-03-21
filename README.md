@@ -1,5 +1,7 @@
 # Steeltoe Continuous Integration
 
+This repository contains templates for creating build configurations on both AppVeyor and Travis CI, along with PowerShell and Bash scripts for running builds on both tools. These scripts can be used on a developer's workstation as well, though some environment configuration is required. [A script](/scripts/set_appveyor_vars_local.ps1) is provided to assist in populating variables used in the AppVeyor build.
+
 ## Workflow Overview
 
 Pushing changes to any Steeltoe repository on GitHub will trigger CI builds on both AppVeyor (Windows) and Travis CI (Linux and OSX). All NuGet packages are built in AppVeyor. Travis CI is used for cross-platform compatibility testing only.
@@ -14,7 +16,7 @@ Once deemed stable, code is merged into the master branch. Successful AppVeyor b
 
 ## Complete Steeltoe Releases - Publish to myget/staging then to nuget.org
 
-When its time for a full release of Steeltoe, the [Steeltoe Universe PowerShell script](/scripts/steeltoe_universe.ps1) will be run on AppVeyor. The script will clone all repositories from GitHub into a temporary local workspace, update all Steeltoe versions in .props files to the version passed in as a parameter, build packages, (optionally) run unit tests, and publish to the [Steeltoe Staging feed](https://www.myget.org/F/steeltoestaging/api/v3/index.json).
+When its time for a full release of Steeltoe, the [Steeltoe Universe PowerShell script](/scripts/steeltoe_universe.ps1) will be run on AppVeyor. The package version is derived from the AppVeyor build configuration. The script will clone all repositories from GitHub into a temporary local workspace, update all Steeltoe versions in .props files to the version that passed in as a parameter, build packages, (optionally) run unit tests, and publish to the [Steeltoe Staging feed](https://www.myget.org/F/steeltoestaging/api/v3/index.json).
 Once the team is confident in the release, AppVeyor is used to push all packages to nuget.org via Environment deployments (click Deploy from the AppVeyor build)
 
 Universe Script Options:
