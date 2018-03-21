@@ -9,7 +9,7 @@ $env:BUILD_TYPE = "Release"
 
 Write-Host "Branch to build is $env:APPVEYOR_REPO_BRANCH"
 # use STEELTOE_VERSION_SUFFIX to set the pre-release version on packages
-If ($env:APPVEYOR_REPO_BRANCH.Substring(0,6) -eq "update") {
+If ($env:APPVEYOR_REPO_BRANCH.StartsWith("update")) {
 	# if this build is from an update branch, only use pre-release suffixes from the branch name (if found)
 	$env:STEELTOE_VERSION_SUFFIX = $env:APPVEYOR_REPO_BRANCH.Split("-")[1]
 }
@@ -39,7 +39,7 @@ ElseIf ($env:APPVEYOR_REPO_BRANCH -eq "dev") {
 	$env:PropsVersion = "-dev"
 	$env:BUILD_TYPE = "Debug"
 }
-ElseIf ($env:APPVEYOR_REPO_BRANCH.SubString(0,6) -eq "update") {
+ElseIf ($env:APPVEYOR_REPO_BRANCH.StartsWith("update")) {
 	Write-Host "Use dependencies from nuget.org and https://www.myget.org/F/steeltoestaging/api/v3/index.json"
 	nuget sources add -Name Steeltoe -Source https://www.myget.org/F/steeltoestaging/api/v3/index.json
 }
