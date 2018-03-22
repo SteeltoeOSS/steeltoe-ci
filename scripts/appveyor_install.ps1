@@ -52,3 +52,4 @@ If (Test-Path config/versions.props)
 # setup a local folder NuGet feed for use during the build
 mkdir $env:APPVEYOR_BUILD_FOLDER\localfeed -Force
 nuget sources add -Name localfeed -Source $env:APPVEYOR_BUILD_FOLDER\localfeed
+Write-Host "localfeed's path is $env:APPVEYOR_BUILD_FOLDER\localfeed"

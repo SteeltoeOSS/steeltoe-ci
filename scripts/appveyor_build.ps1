@@ -1,5 +1,3 @@
-dotnet restore
-
 Set-Location src
 If ($env:ProjectList -eq $null){
 	Write-Host "env:ProjectList was not defined - discover and build projects alphabetically"
@@ -10,8 +8,10 @@ ForEach ($_ in $env:ProjectList.Split(' ')) {
 	Write-Host "Now building $_..."
 	Set-Location $_
 
-	# if there is a tag with the latest commit don't include symbols or source
-	If ($env:APPVEYOR_REPO_TAG_NAME)
+	dotnet restore
+
+	# if this is an update branch build, don't include symbols or source
+	If ($env:APPVEYOR_REPO_BRANCH.StartsWith("update"))
 	{
 		Write-Host "Creating package $_.$env:STEELTOE_VERSION$env:STEELTOE_DASH_VERSION_SUFFIX without symbols"
 		dotnet pack --configuration $env:BUILD_TYPE /p:Version=$env:STEELTOE_VERSION$env:STEELTOE_DASH_VERSION_SUFFIX -o $env:APPVEYOR_BUILD_FOLDER\localfeed

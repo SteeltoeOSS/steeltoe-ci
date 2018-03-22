@@ -5,6 +5,7 @@ Set-Location test
 # run unit tests in each project in the test folder
 Get-ChildItem -Directory -Filter "*.Test" | ForEach-Object {
 	Set-Location $_.Name
+	dotnet restore
 	dotnet xunit -verbose
 	$errors = $errors + $lastexitcode
 	Set-Location ..
