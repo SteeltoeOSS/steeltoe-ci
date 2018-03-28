@@ -2,6 +2,10 @@
  * Jenkins DSL for Steeltoe Samples
  */
 
+recipients = [
+    'ccheetham',
+]
+
 job('steeltoe-samples-configuration-simple') {
     displayName('Steeltoe Samples : Configuration : Simple')
     wrappers {
@@ -23,7 +27,7 @@ job('steeltoe-samples-configuration-simple') {
         shell('ci/jenkins.sh Configuration/src/AspDotNetCore/Simple')
     }
     publishers {
-            mailer('ccheetham@pivotal.io', true, false)
+        mailer(recipients.collect { "${it}@pivotal.io" }.join(' '), true, false)
     }
     logRotator {
         numToKeep 5
