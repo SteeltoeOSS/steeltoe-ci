@@ -15,7 +15,7 @@ job('steeltoe-samples') {
         git {
             remote {
                 github('Steeltoe/Samples', 'https')
-                branch(branchName)
+                branch('dev')
             }
         }
     }
