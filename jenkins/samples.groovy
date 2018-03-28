@@ -20,7 +20,7 @@ job('steeltoe-samples') {
         }
     }
     steps {
-        shell('echo HI')
+        shell('ci/jenkins.sh')
     }
     publishers {
             mailer('ccheetham@pivotal.io', true, false)
