@@ -6,7 +6,7 @@ recipients = [
     'ccheetham',
 ]
 
-samples = [
+samplePaths = [
     'Configuration/src/AspDotNetCore/CloudFoundry',
     'Configuration/src/AspDotNetCore/Simple',
     'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
@@ -16,8 +16,8 @@ def sample2Job(def sample) {
     "steeltoe-samples-${sample.split('/').findAll { !(it in ['src']) }.collect { it.toLowerCase() }.join('-')}"
 }
 
-samples.each { sample ->
-    job(sample2Job(sample)) {
+samplePaths.each { samplePath ->
+    job(sample2Job(samplePath)) {
         wrappers {
             credentialsBinding {
                 usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
@@ -34,7 +34,7 @@ samples.each { sample ->
             }
         }
         steps {
-            shell("ci/jenkins.sh ${sample}")
+            shell("ci/jenkins.sh ${samplePath}")
         }
         publishers {
             archiveArtifacts('test.log')
