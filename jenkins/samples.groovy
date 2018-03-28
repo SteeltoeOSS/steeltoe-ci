@@ -42,6 +42,9 @@ samplePaths.each { samplePath ->
                 }
             }
         }
+        triggers {
+            scm('H/15 * * * *')
+        }
         steps {
             shell("ci/jenkins.sh ${samplePath}")
         }
