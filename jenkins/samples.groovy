@@ -23,7 +23,7 @@ job('steeltoe-samples') {
         shell('echo HI')
     }
     publishers {
-            mailer('ccheetham@pivotal.io', true, false
+            mailer('ccheetham@pivotal.io', true, false)
     }
     logRotator {
         numToKeep 5
