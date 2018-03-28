@@ -10,7 +10,7 @@ job('steeltoe-samples-configuration-simple') {
     displayName('Steeltoe Samples : Configuration : Simple')
     wrappers {
         credentialsBinding {
-            usernamePassword 'STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf'
+            usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
         }
         preBuildCleanup()
     }
@@ -31,7 +31,7 @@ job('steeltoe-samples-configuration-simple') {
         mailer(recipients.collect { "${it}@pivotal.io" }.join(' '), true, false)
     }
     logRotator {
-        numToKeep 5
+        numToKeep(5)
     }
 }
 
