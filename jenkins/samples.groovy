@@ -2,8 +2,8 @@
  * Jenkins DSL for Steeltoe Samples
  */
 
-job('steeltoe-samples') {
-    displayName('Steeltoe Samples')
+job('steeltoe-samples-configuration-simple') {
+    displayName('Steeltoe Samples : Configuration : Simple')
     wrappers {
         credentialsBinding {
             usernamePassword 'STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf'
@@ -20,7 +20,7 @@ job('steeltoe-samples') {
         }
     }
     steps {
-        shell('ci/jenkins.sh')
+        shell('ci/jenkins.sh Configuration/src/AspDotNetCore/Simple')
     }
     publishers {
             mailer('ccheetham@pivotal.io', true, false)
