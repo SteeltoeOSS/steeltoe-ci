@@ -27,6 +27,7 @@ job('steeltoe-samples-configuration-simple') {
         shell('ci/jenkins.sh Configuration/src/AspDotNetCore/Simple')
     }
     publishers {
+        archiveArtifacts('test.log')
         mailer(recipients.collect { "${it}@pivotal.io" }.join(' '), true, false)
     }
     logRotator {
