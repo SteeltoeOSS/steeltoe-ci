@@ -7,7 +7,10 @@ recipients = [
 ]
 
 def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed', 'jenkins')
-println "PDIR ${projectDir}"
+println "listing $projectDir"
+projectDir.eachFile {
+    println it
+}
 
 projectDir.resolve('features').eachLine {
     println "feature $it"
