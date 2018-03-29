@@ -6,7 +6,8 @@ recipients = [
     'ccheetham',
 ]
 
-def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed')
+// def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed')
+def projectDir = java.nio.file.Paths.get('.')
 println "listing $projectDir"
 projectDir.eachFile {
     println it
