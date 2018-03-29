@@ -6,15 +6,15 @@ recipients = [
     'ccheetham',
 ]
 
-def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed', 'jenkins')
+def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed')
 println "listing $projectDir"
 projectDir.eachFile {
     println it
 }
 
-projectDir.resolve('features').eachLine {
-    println "feature $it"
-}
+// projectDir.resolve('features').eachLine {
+    // println "feature $it"
+// }
 
 samplePaths = [
     'Connectors/src/AspDotNetCore/PostgreSql',
