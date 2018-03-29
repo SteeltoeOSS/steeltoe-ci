@@ -46,7 +46,9 @@ samplePaths.each { samplePath ->
             scm('H/15 * * * *')
         }
         steps {
-            shell("ci/jenkins.sh ${samplePath}")
+            ansiColor('xterm') {
+                shell("ci/jenkins.sh ${samplePath}")
+            }
         }
         publishers {
             archiveArtifacts('test.log')
