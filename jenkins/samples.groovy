@@ -46,9 +46,7 @@ samplePaths.each { samplePath ->
             scm('H/15 * * * *')
         }
         steps {
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
-                shell("ci/jenkins.sh ${samplePath}")
-            }
+            shell("ci/jenkins.sh ${samplePath}")
         }
         publishers {
             archiveArtifacts('test.log')
