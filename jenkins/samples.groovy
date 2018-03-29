@@ -8,7 +8,7 @@ recipients = [
 
 def psep = System.properties['path.separator']
 def path = "${System.env['JENKINS_HOME']}${psep}workspace${psep}${System.env['JOB_NAME']}"
-println "PWD ${new File(path)"
+println "PWD ${new File(path)}"
 
 samplePaths = [
     'Connectors/src/AspDotNetCore/PostgreSql',
