@@ -46,7 +46,7 @@ samplePaths.each { samplePath ->
             scm('H/15 * * * *')
         }
         steps {
-            ansiColor('xterm') {
+            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
                 shell("ci/jenkins.sh ${samplePath}")
             }
         }
