@@ -6,6 +6,8 @@ recipients = [
     'ccheetham',
 ]
 
+println "PWD ${new File('.')}"
+
 samplePaths = [
     'Connectors/src/AspDotNetCore/PostgreSql',
     'Connectors/src/AspDotNetCore/PostgreEFCore',
