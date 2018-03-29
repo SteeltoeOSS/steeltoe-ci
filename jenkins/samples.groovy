@@ -9,6 +9,10 @@ recipients = [
 def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed', 'jenkins')
 println "PDIR ${projectDir}"
 
+projectDir.resolve('features').eachLine {
+    println "feature $it"
+}
+
 samplePaths = [
     'Connectors/src/AspDotNetCore/PostgreSql',
     'Connectors/src/AspDotNetCore/PostgreEFCore',
