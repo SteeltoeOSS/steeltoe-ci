@@ -6,7 +6,7 @@ recipients = [
     'ccheetham',
 ]
 
-def projectDir = new File(System.env['JENKINS_HOME'], 'workspace/steelto-ci')
+def projectDir = java.nio.file.Paths.get(System.env['JENKINS_HOME'], 'workspace', 'steeltoe-seed', 'jenkins')
 println "PDIR ${projectDir}"
 
 samplePaths = [
