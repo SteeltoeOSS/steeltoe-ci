@@ -7,9 +7,8 @@ recipients = [
 ]
 
 def psep = System.properties['path.separator']
-def path = "${System.env['JENKINS_HOME']}${psep}workspace${psep}${System.env['JOB_NAME']}"
+def path = "${System.env['JENKINS_HOME']}${psep}workspace${psep}steeltoe-ci"
 println "PWD ${new File(path)}"
-System.env.keySet().sort().each { println "${it}=${System.env[it]}" }
 
 samplePaths = [
     'Connectors/src/AspDotNetCore/PostgreSql',
