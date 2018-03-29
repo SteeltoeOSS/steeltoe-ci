@@ -6,9 +6,8 @@ recipients = [
     'ccheetham',
 ]
 
-def psep = System.properties['path.separator']
-def path = "${System.env['JENKINS_HOME']}${psep}workspace${psep}steeltoe-ci"
-println "PWD ${new File(path)}"
+def projectDir = new File(System.env['JENKINS_HOME'], 'workspace/steelto-ci')
+println "PDIR ${projectDir}"
 
 samplePaths = [
     'Connectors/src/AspDotNetCore/PostgreSql',
