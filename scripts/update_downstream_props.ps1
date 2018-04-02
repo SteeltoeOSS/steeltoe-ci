@@ -36,6 +36,7 @@ $TotalTime.Start()
 Remove-Item workspace -Force -Recurse -ErrorAction SilentlyContinue
 [int]$env:TestErrors = 0
 $env:ProcessTimes = ""
+$waitedForMyGet = $false
 
 mkdir workspace -Force
 Set-Location workspace
@@ -72,9 +73,11 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
             $xmlContent.OuterXml | Out-File "config/versions-$env:APPVEYOR_REPO_BRANCH.props"
             git add config/versions-$env:APPVEYOR_REPO_BRANCH.props
             git commit -m "Update versions-$env:APPVEYOR_REPO_BRANCH.props"
-
-            Write-Host "Before we push this change, wait a bit for MyGet to index what we just published so the build we're about to trigger doesn't fail"
-            Start-Sleep -s 30
+            if (-Not $waitedForMyGet) {
+                Write-Host "Before we push this change, wait a bit for MyGet to index what we just published so the build we're about to trigger doesn't fail"
+                Start-Sleep -s 30
+                $waitedForMyGet = $true
+            }
             git push --porcelain
         }
     }
