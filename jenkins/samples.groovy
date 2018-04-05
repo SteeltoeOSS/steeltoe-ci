@@ -51,24 +51,24 @@ samplePaths.each { samplePath ->
         publishers {
             archiveArtifacts('test.log')
             mailer(recipients.collect { "${it}@pivotal.io" }.join(' '), true, false)
-        }
-        slackNotifier {
-            room('#steeltoe-pipelines')
-            notifyAborted(true)
-            notifyFailure(true)
-            notifyNotBuilt(true)
-            notifyUnstable(true)
-            notifyBackToNormal(true)
-            notifySuccess(false)
-            notifyRepeatedFailure(false)
-            startNotification(false)
-            includeTestSummary(false)
-            includeCustomMessage(false)
-            customMessage(null)
-            sendAs(null)
-            commitInfoChoice('AUTHORS_AND_TITLES')
-            teamDomain('pivotal')
-            authToken('MKRw5ybKEIgspDGHtyaq4TI2')
+            slackNotifier {
+                room('#steeltoe-pipelines')
+                notifyAborted(true)
+                notifyFailure(true)
+                notifyNotBuilt(true)
+                notifyUnstable(true)
+                notifyBackToNormal(true)
+                notifySuccess(false)
+                notifyRepeatedFailure(false)
+                startNotification(false)
+                includeTestSummary(false)
+                includeCustomMessage(false)
+                customMessage(null)
+                sendAs(null)
+                commitInfoChoice('AUTHORS_AND_TITLES')
+                teamDomain('pivotal')
+                authToken('MKRw5ybKEIgspDGHtyaq4TI2')
+            }
         }
         logRotator {
             numToKeep(5)
