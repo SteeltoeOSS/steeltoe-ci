@@ -12,7 +12,7 @@ samplePaths = [
     // 'Connectors/src/AspDotNetCore/MySql/MySql',
     // 'Configuration/src/AspDotNetCore/CloudFoundry',
     'Configuration/src/AspDotNetCore/Simple',
-    // 'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
+    'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
     // 'Security/src/CloudFoundrySingleSignon',
     // 'Management/src/AspDotNetCore/CloudFoundry',
 ]
