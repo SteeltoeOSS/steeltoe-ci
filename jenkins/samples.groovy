@@ -39,12 +39,12 @@ samplePaths.each { samplePath ->
                 }
                 preBuildCleanup()
             }
-            label('steeltoe', platform)
+            label("steeltoe && ${platform}")
                 scm {
                     git {
                         remote {
                             github('SteeltoeOSS/Samples', 'https')
-                                branch('dev')
+                            branch('dev')
                         }
                     }
                 }
