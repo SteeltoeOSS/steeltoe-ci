@@ -52,7 +52,11 @@ samplePaths.each { samplePath ->
                 scm('H/15 * * * *')
             }
             steps {
-                shell("ci/jenkins.${platform.startsWith('win') ? 'cmd' : 'sh'} ${samplePath}")
+                if (platform.startsWith('win')) {
+                    shell("ci\\jenkins.cmd ${samplePath.replaceAll('/', '\\\\')}")
+                } else {
+                    shell("ci/jenkins.sh ${samplePath}")
+                }
             }
             publishers {
                 archiveArtifacts('test.log')
