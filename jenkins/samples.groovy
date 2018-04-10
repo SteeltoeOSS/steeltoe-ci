@@ -53,7 +53,7 @@ samplePaths.each { samplePath ->
             }
             steps {
                 if (platform.startsWith('win')) {
-                    shell("ci\\jenkins.cmd ${samplePath.replaceAll('/', '\\\\')}")
+                    batchFile("ci\\jenkins.cmd ${samplePath.replaceAll('/', '\\\\')}")
                 } else {
                     shell("ci/jenkins.sh ${samplePath}")
                 }
