@@ -2,7 +2,7 @@
  * Jenkins DSL for Steeltoe Samples
  */
 
-samples = [
+samplePaths = [
     // 'Connectors/src/AspDotNetCore/PostgreSql',
     // 'Connectors/src/AspDotNetCore/PostgreEFCore',
     // 'Connectors/src/AspDotNetCore/Redis',
@@ -30,9 +30,9 @@ def jobForSample(def sample, def platform) {
     "steeltoe-samples-${sample.split('/').findAll { !(it in ['src']) }.collect { it.toLowerCase() }.join('-')}-${platform}"
 }
 
-samples.each { sample ->
+samplePaths.each { samplePath ->
     platforms.each { platform ->
-        job(jobForSample(sample, platform)) {
+        job(jobForSample(samplePath, platform)) {
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
@@ -52,7 +52,7 @@ samples.each { sample ->
                 scm('H/15 * * * *')
             }
             steps {
-                shell("ci/jenkins.${platform.startsWith('win') ? 'bat' : 'sh'} ${sample}")
+                shell("ci/jenkins.${platform.startsWith('win') ? 'bat' : 'sh'} ${samplePath}")
             }
             publishers {
                 archiveArtifacts('test.log')
