@@ -52,7 +52,7 @@ samplePaths.each { samplePath ->
                 scm('H/15 * * * *')
             }
             steps {
-                shell("ci/jenkins.${platform.startsWith('win') ? 'bat' : 'sh'} ${samplePath}")
+                shell("ci/jenkins.${platform.startsWith('win') ? 'cmd' : 'sh'} ${samplePath}")
             }
             publishers {
                 archiveArtifacts('test.log')
