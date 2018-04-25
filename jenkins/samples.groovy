@@ -3,8 +3,8 @@
  */
 
 samplePaths = [
-    'Connectors/src/AspDotNetCore/PostgreSql',
-    'Connectors/src/AspDotNetCore/PostgreEFCore',
+    // 'Connectors/src/AspDotNetCore/PostgreSql',
+    // 'Connectors/src/AspDotNetCore/PostgreEFCore',
     'Connectors/src/AspDotNetCore/Redis',
     'Connectors/src/AspDotNetCore/MySqlEFCore',
     'Connectors/src/AspDotNetCore/MySqlEF6',
