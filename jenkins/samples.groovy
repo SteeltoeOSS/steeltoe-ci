@@ -9,7 +9,7 @@ samplePaths = [
     'Connectors/src/AspDotNetCore/MySqlEFCore',
     'Connectors/src/AspDotNetCore/MySqlEF6',
     'Connectors/src/AspDotNetCore/RabbitMQ',
-    'Connectors/src/AspDotNetCore/MySql/MySql',
+    'Connectors/src/AspDotNetCore/MySql',
     'Configuration/src/AspDotNetCore/CloudFoundry',
     'Configuration/src/AspDotNetCore/Simple',
     'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
