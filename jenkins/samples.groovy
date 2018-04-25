@@ -3,16 +3,16 @@
  */
 
 samplePaths = [
-    // 'Connectors/src/AspDotNetCore/PostgreSql',
-    // 'Connectors/src/AspDotNetCore/PostgreEFCore',
-    'Connectors/src/AspDotNetCore/Redis',
-    'Connectors/src/AspDotNetCore/MySqlEFCore',
-    'Connectors/src/AspDotNetCore/MySqlEF6',
-    'Connectors/src/AspDotNetCore/RabbitMQ',
-    'Connectors/src/AspDotNetCore/MySql',
     'Configuration/src/AspDotNetCore/CloudFoundry',
     'Configuration/src/AspDotNetCore/Simple',
     'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
+    'Connectors/src/AspDotNetCore/MySql',
+    'Connectors/src/AspDotNetCore/MySqlEFCore',
+    'Connectors/src/AspDotNetCore/MySqlEF6',
+    // 'Connectors/src/AspDotNetCore/PostgreSql',
+    // 'Connectors/src/AspDotNetCore/PostgreEFCore',
+    'Connectors/src/AspDotNetCore/RabbitMQ',
+    'Connectors/src/AspDotNetCore/Redis',
     'Security/src/CloudFoundrySingleSignon',
     'Management/src/AspDotNetCore/CloudFoundry',
 ]
