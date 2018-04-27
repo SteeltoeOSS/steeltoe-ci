@@ -19,7 +19,7 @@ samplePaths = [
 
 platforms = [
     'ubuntu1604',
-    // 'win2012',
+    'win2012',
 ]
 
 alertees = [
