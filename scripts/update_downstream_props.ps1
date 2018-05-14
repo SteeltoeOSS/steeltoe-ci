@@ -37,6 +37,7 @@ Remove-Item workspace -Force -Recurse -ErrorAction SilentlyContinue
 [int]$env:TestErrors = 0
 $env:ProcessTimes = ""
 $waitedForMyGet = $false
+$propsFilePath = "config/versions-$env:APPVEYOR_REPO_BRANCH.props"
 
 mkdir workspace -Force
 Set-Location workspace
@@ -50,13 +51,13 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
     Invoke-Expression $cloneString
 
     Set-Location $_.Split("/")[1]
-    If (Test-Path config/versions-$env:APPVEYOR_REPO_BRANCH.props)
+    If (Test-Path $propsFilePath)
     {
         $updatedSomething = $false
         # modify versions.props (xml) to update all steeltoe references (except SteeltoeVersion and SteeltoeVersionSuffix)
         $xmlContent = New-Object System.Xml.XmlDocument
         $xmlContent.PreserveWhitespace = $true
-        $xmlContent.Load("$pwd/config/versions-$env:APPVEYOR_REPO_BRANCH.props")
+        $xmlContent.Load("$pwd/$propsFilePath")
         $xmlContent.SelectNodes("//Project/PropertyGroup/*") | 
             ForEach-Object {
                 If ($env:PackageReferencesToUpdate.Contains($_.name))
@@ -70,8 +71,9 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
         if ($updatedSomething)
         {
             Write-Host "Dependencies were updated, commit and push the changes!"
-            $xmlContent.OuterXml | Out-File "config/versions-$env:APPVEYOR_REPO_BRANCH.props"
-            git add config/versions-$env:APPVEYOR_REPO_BRANCH.props
+            $trimmed = $xmlContent.OuterXml -replace "(?s)`r`n\s*$"
+            [system.io.file]::WriteAllText("$pwd/$propsFilePath", $trimmed)
+            git add $propsFilePath
             git commit -m "Update versions-$env:APPVEYOR_REPO_BRANCH.props"
             if (-Not $waitedForMyGet) {
                 Write-Host "Before we push this change, wait a bit for MyGet to index what we just published so the build we're about to trigger doesn't fail"
@@ -83,7 +85,7 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
     }
     Else 
     {
-        Write-Host "config/versions-$env:APPVEYOR_REPO_BRANCH.props not found"
+        Write-Host "$propsFilePath not found"
     }
     Set-Location ..
     $ProjectTime.Stop()
