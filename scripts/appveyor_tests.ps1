@@ -8,7 +8,7 @@ Get-ChildItem -Directory -Filter "*.Test" | ForEach-Object {
 	dotnet restore
 	# use dotnet test until dotnet xunit works on netcoreapp2.1
 	# dotnet xunit -verbose
-	dotnet test -v d
+	dotnet test -v n
 	$errors = $errors + $lastexitcode
 	Set-Location ..
 }
