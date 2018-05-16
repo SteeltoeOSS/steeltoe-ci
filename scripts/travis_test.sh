@@ -1,5 +1,6 @@
 #!/bin/bash
-if [[! $TestFrameworkVersion ]]
+if [[! $TestFrameworkVersion ]];
+then
     export TestFrameworkVersion="netcoreapp2.0"
 fi
 
