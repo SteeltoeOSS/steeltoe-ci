@@ -11,7 +11,7 @@ for d in ./test/*.Test; do
     dotnet restore
 	# use dotnet test until dotnet xunit works on netcoreapp2.1
     # dotnet xunit -verbose -framework netcoreapp2.0
-    dotnet test -v n -f $TestFrameworkVersion
+    dotnet test -v m -f $TestFrameworkVersion
     cd ../../
 done
 
