@@ -6,7 +6,9 @@ Set-Location test
 Get-ChildItem -Directory -Filter "*.Test" | ForEach-Object {
 	Set-Location $_.Name
 	dotnet restore
-	dotnet xunit -verbose
+	# use dotnet test until dotnet xunit works on netcoreapp2.1
+	# dotnet xunit -verbose
+	dotnet test -v d
 	$errors = $errors + $lastexitcode
 	Set-Location ..
 }
