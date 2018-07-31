@@ -64,25 +64,8 @@ samplePaths.each { samplePath ->
             }
             publishers {
                 archiveArtifacts('test.log')
-                    mailer(alertees.collect { "${it}@pivotal.io" }.join(' '), true, false)
-                    // slackNotifier {
-                    //     room('#steeltoe-pipelines')
-                    //     notifyAborted(true)
-                    //     notifyFailure(true)
-                    //     notifyNotBuilt(true)
-                    //     notifyUnstable(true)
-                    //     notifyBackToNormal(true)
-                    //     notifySuccess(false)
-                    //     notifyRepeatedFailure(false)
-                    //     startNotification(false)
-                    //     includeTestSummary(false)
-                    //     includeCustomMessage(false)
-                    //     customMessage(null)
-                    //     sendAs(null)
-                    //     commitInfoChoice('AUTHORS_AND_TITLES')
-                    //     teamDomain('pivotal')
-                    //     authToken('MKRw5ybKEIgspDGHtyaq4TI2')
-                    // }
+                archiveJunit('test.out/reports/*.xml')
+                mailer(alertees.collect { "${it}@pivotal.io" }.join(' '), true, false)
             }
             logRotator {
                 numToKeep(5)
