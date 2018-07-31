@@ -24,6 +24,9 @@ platforms = [
 
 alertees = [
     'ccheetham',
+    'dtillman',
+    'jkonicki',
+    'thess',
 ]
 
 def jobForSample(def sample, def platform) {
