@@ -13,7 +13,7 @@ samplePaths = [
     // 'Connectors/src/AspDotNetCore/PostgreEFCore',
     'Connectors/src/AspDotNetCore/RabbitMQ',
     'Connectors/src/AspDotNetCore/Redis',
-    'Security/src/CloudFoundrySingleSignon',
+    'Security/src/AspDotNetCore/CloudFoundrySingleSignon',
     'Management/src/AspDotNetCore/CloudFoundry',
 ]
 
