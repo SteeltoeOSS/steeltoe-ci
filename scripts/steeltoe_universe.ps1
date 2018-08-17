@@ -1,3 +1,6 @@
+########################################################
+# This is a script for building all Steeltoe Libraries #
+########################################################
 Param(
     [Parameter(Mandatory=$true)]
     [string]$Steeltoe_Version_To_Build,
