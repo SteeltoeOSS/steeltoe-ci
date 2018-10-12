@@ -1,6 +1,3 @@
-# temporarily disable this script
-return
-
 If ($env:APPVEYOR_REPO_BRANCH -ne "dev" -and $env:APPVEYOR_REPO_BRANCH -ne "master")
 {
     Write-Host "Dependency updates are only available for the dev and master branches"
