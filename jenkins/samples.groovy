@@ -9,8 +9,8 @@ samplePaths = [
     'Connectors/src/AspDotNetCore/MySql',
     'Connectors/src/AspDotNetCore/MySqlEFCore',
     'Connectors/src/AspDotNetCore/MySqlEF6',
-    // 'Connectors/src/AspDotNetCore/PostgreSql',
-    // 'Connectors/src/AspDotNetCore/PostgreEFCore',
+    'Connectors/src/AspDotNetCore/PostgreSql',
+    'Connectors/src/AspDotNetCore/PostgreEFCore',
     'Connectors/src/AspDotNetCore/RabbitMQ',
     'Connectors/src/AspDotNetCore/Redis',
     'Security/src/AspDotNetCore/CloudFoundrySingleSignon',
@@ -36,7 +36,7 @@ def jobForSample(def sample, def platform) {
 samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
-            disabled()
+            // disabled()
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
