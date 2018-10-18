@@ -74,7 +74,7 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
             $trimmed = $xmlContent.OuterXml -replace "(?s)`r`n\s*$"
             [system.io.file]::WriteAllText("$pwd/$propsFilePath", $trimmed)
             git add $propsFilePath
-            git commit -m "Update versions-$env:APPVEYOR_REPO_BRANCH.props"
+            git commit -m "Update versions-$env:APPVEYOR_REPO_BRANCH.props from $env:APPVEYOR_PROJECT_ID"
             if (-Not $waitedForMyGet) {
                 Write-Host "Before we push this change, wait a bit for MyGet to index what we just published so the build we're about to trigger doesn't fail"
                 Start-Sleep -s 30

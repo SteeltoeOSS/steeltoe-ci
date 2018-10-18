@@ -26,12 +26,14 @@ ForEach ($_ in $env:SteeltoeRepositoryList.Split(' ')) {
         Invoke-Expression $cloneString
     }
     Else {
-        Write-Host "$_ found on disk"
+        Write-Host "$_ found on disk, pulling latest"
     }
 
     Set-Location $_.Split("/")[1]
     # make sure the destination branch is checked out
     Invoke-Expression "git checkout $destination"
+    # be current
+    Invoke-Expression "git pull"
     # merge the changes
     Invoke-Expression "git merge $source"
     Set-Location ..
