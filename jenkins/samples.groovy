@@ -52,7 +52,7 @@ samplePaths.each { samplePath ->
                     }
                     configure { gitScm ->
                         gitScm / 'extensions' << 'hudson.plugins.git.extensions.impl.PathRestriction' {
-                            includedRegions(samplePath)
+                            includedRegions("${samplePath}/.*")
                         }
                     }
                 }
