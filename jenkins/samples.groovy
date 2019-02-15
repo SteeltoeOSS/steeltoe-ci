@@ -36,7 +36,9 @@ def jobForSample(def sample, def platform) {
 samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
-            // disabled()
+            if (platform == 'win2012') {
+                disabled()
+            }
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
