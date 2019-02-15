@@ -54,16 +54,17 @@ samplePaths.each { samplePath ->
                     }
                     configure { gitScm ->
                         gitScm / 'extensions' << 'hudson.plugins.git.extensions.impl.PathRestriction' {
-                            includedRegions("${samplePath}/.*" +
-                            "\nbehave.ini" +
-                            "\nci/.*" +
-                            "\nconfig/.*" +
-                            "\nenvironment.py" +
-                            "\npyenv.pkgs" +
-                            "\npylib/*" +
-                            "\test-run.*" +
-                            "\test-setup.*"
-                            )
+                            includedRegions([
+                                    "${samplePath}/.*",
+                                    "behave.ini",
+                                    "ci/.*",
+                                    "config/.*",
+                                    "environment.py",
+                                    "pyenv.pkgs",
+                                    "pylib/*",
+                                    "test-run.*",
+                                    "test-setup.*",
+                                    ].join('\n'))
                         }
                     }
                 }
