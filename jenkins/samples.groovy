@@ -44,14 +44,19 @@ samplePaths.each { samplePath ->
                 preBuildCleanup()
             }
             label("steeltoe && ${platform}")
-                scm {
-                    git {
-                        remote {
-                            github('SteeltoeOSS/Samples', 'https')
-                            branch('dev')
+            scm {
+                git {
+                    remote {
+                        github('SteeltoeOSS/Samples', 'https')
+                        branch('dev')
+                    }
+                    configure { gitScm ->
+                        gitScm / 'extensions' << 'hudson.plugins.git.extensions.impl.PathRestriction' {
+                            includedRegions(samplePath)
                         }
                     }
                 }
+            }
             triggers {
                 scm('H/15 * * * *')
             }
