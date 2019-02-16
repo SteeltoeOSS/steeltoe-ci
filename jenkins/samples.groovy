@@ -38,17 +38,6 @@ def descriptionForSample(def sample, def platform) {
     nodes = sample.split('/')
     library = nodes[0]
     sample = nodes[-1]
-    switch (platform) {
-        case ~/win.*/:
-            os = 'Windows'
-            break
-        case ~/ubuntu.*/:
-            os = 'Linux'
-            break
-        default:
-            os = platform
-            break
-    }
     switch (nodes[-2]) {
         case ~/.*NetCore$/:
             dotnet = '.NET Core'
@@ -60,7 +49,18 @@ def descriptionForSample(def sample, def platform) {
             dotnet = nodes[-2]
             break
     }
-    "SteeltoeOSS ${os} Sample CI Build for ${library} ${sample} for ${dotnet}"
+    switch (platform) {
+        case ~/win.*/:
+            os = 'Windows'
+            break
+        case ~/ubuntu.*/:
+            os = 'Linux'
+            break
+        default:
+            os = platform
+            break
+    }
+    "SteeltoeOSS Sample CI Build for ${library}:${sample} for ${dotnet} on ${os}"
 }
 
 samplePaths.each { samplePath ->
