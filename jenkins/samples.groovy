@@ -66,7 +66,7 @@ def displayNameForSample(def sample, def platform) {
 samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
-            dislayName(displayNameForSample(samplePath, platform) as String)
+            displayName(displayNameForSample(samplePath, platform))
             if (samplePath == 'Configuration/src/AspDotNetCore/Simple' && platform == 'win2012') {
                 disabled()
                 description('Disabled due to lack of support for long file names on Windows 2012 slave')
