@@ -26,6 +26,7 @@ alertees = [
     'ccheetham',
     'dtillman',
     'jkonicki',
+    'hsarella',
     'thess',
 ]
 
