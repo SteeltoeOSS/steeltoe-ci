@@ -60,7 +60,7 @@ def displayNameForSample(def sample, def platform) {
             os = platform
             break
     }
-    "SteeltoeOSS Sample ${library} ${sample} Test for ${dotnet} on ${os}"
+    "SteeltoeOSS Sample ${library} ${sample} Test for ${dotnet} on ${os}" as String
 }
 
 samplePaths.each { samplePath ->
