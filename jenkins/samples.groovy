@@ -34,9 +34,39 @@ def jobForSample(def sample, def platform) {
     "steeltoe-samples-${sample.split('/').findAll { !(it in ['src']) }.collect { it.toLowerCase() }.join('-')}-${platform}"
 }
 
+def descriptionForSample(def sample, def platform) {
+    nodes = sample.split('/')
+    library = nodes[0]
+    sample = nodes[-1]
+    switch (platform) {
+        case ~/win.*/:
+            os = 'Windows'
+            break
+        case ~/ubuntu.*/:
+            os = 'Linux'
+            break
+        default:
+            os = platform
+            break
+    }
+    switch (nodes[-2]) {
+        case ~/.*NetCore$/:
+            dotnet = '.NET Core'
+            break
+        case ~/.*Net4/:
+            dotnet = '.NET Framework 4'
+            break
+        default:
+            dotnet = nodes[-2]
+            break
+    }
+    "SteeltoeOSS ${os} Sample CI Build for ${library} ${sample} for ${dotnet}"
+}
+
 samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
+            description(descriptionForSample(samplePath, platform))
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
