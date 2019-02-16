@@ -34,7 +34,7 @@ def jobForSample(def sample, def platform) {
     "steeltoe-samples-${sample.split('/').findAll { !(it in ['src']) }.collect { it.toLowerCase() }.join('-')}-${platform}"
 }
 
-def descriptionForSample(def sample, def platform) {
+def displayNameForSample(def sample, def platform) {
     nodes = sample.split('/')
     library = nodes[0]
     sample = nodes[-1]
@@ -60,20 +60,20 @@ def descriptionForSample(def sample, def platform) {
             os = platform
             break
     }
-    "SteeltoeOSS Sample CI Build for ${library}:${sample} for ${dotnet} on ${os}"
+    "SteeltoeOSS Sample ${library} ${sample} Test for ${dotnet} on ${os}"
 }
 
 samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
-            jobDesc = descriptionForSample(samplePath, platform)
+            dislayName(displayNameForSample(samplePath, platform)(
             if (samplePath == 'Configuration/src/AspDotNetCore/Simple' && platform == 'win2012') {
                 disabled()
-                jobDesc += '\n\nDisabled due to lack of support for long file names on Windows 2012 slave'
+                description('Disabled due to lack of support for long file names on Windows 2012 slave')
             }
             if (samplePath == 'Security/src/AspDotNetCore/CloudFoundrySingleSignon' && platform == 'win2012') {
                 disabled()
-                jobDesc += '\n\nDisabled due to inability to run UAA client on Windows 2012 slave'
+                description('Disabled due to inability to run UAA client on Windows 2012 slave')
             }
             wrappers {
                 credentialsBinding {
@@ -123,7 +123,6 @@ samplePaths.each { samplePath ->
             logRotator {
                 numToKeep(5)
             }
-            description(jobDesc)
         }
     }
 }
