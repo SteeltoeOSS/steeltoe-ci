@@ -69,7 +69,11 @@ samplePaths.each { samplePath ->
             jobDesc = descriptionForSample(samplePath, platform)
             if (samplePath == 'Configuration/src/AspDotNetCore/Simple' && platform == 'win2012') {
                 disabled()
-                jobDesc += '\n\nDisabled due to lack of support for long file names on Windows 2012'
+                jobDesc += '\n\nDisabled due to lack of support for long file names on Windows 2012 slave'
+            }
+            if (samplePath == 'Security/src/AspDotNetCore/CloudFoundrySingleSignon' && platform == 'win2012') {
+                disabled()
+                jobDesc += '\n\nDisabled due to inability to run UAA client on Windows 2012 slave'
             }
             wrappers {
                 credentialsBinding {
