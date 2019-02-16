@@ -66,7 +66,11 @@ def descriptionForSample(def sample, def platform) {
 samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
-            description(descriptionForSample(samplePath, platform))
+            jobDesc = descriptionForSample(samplePath, platform)
+            if (samplePath == 'Configuration/src/AspDotNetCore/Simple' && platform == 'win2012') {
+                disabled()
+                jobDesc += '\n\nDisabled due to lack of support for long files on Windows 2012'
+            }
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
@@ -115,6 +119,7 @@ samplePaths.each { samplePath ->
             logRotator {
                 numToKeep(5)
             }
+            description(jobDesc)
         }
     }
 }
