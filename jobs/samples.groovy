@@ -63,10 +63,10 @@ def displayNameForSample(def sample, def platform) {
     sample = nodes[-1]
     switch (nodes[-2]) {
         case ~/.*NetCore$/:
-            dotnet = '.NET Core'
+            dotnet = 'core'
             break
         case ~/.*Net4/:
-            dotnet = '.NET Framework 4'
+            dotnet = 'fw4'
             break
         default:
             dotnet = nodes[-2]
@@ -74,16 +74,16 @@ def displayNameForSample(def sample, def platform) {
     }
     switch (platform) {
         case ~/win.*/:
-            os = 'Windows'
+            os = 'win'
             break
         case ~/ubuntu.*/:
-            os = 'Linux'
+            os = 'lin'
             break
         default:
             os = platform
             break
     }
-    "Steeltoe Sample ${library}:${sample} (${dotnet} on ${os})"
+    "Steeltoe Sample ${library}/${sample} (${dotnet}/${os})"
 }
 
 // jobs
