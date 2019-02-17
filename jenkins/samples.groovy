@@ -41,6 +41,17 @@ alertees = [
     'thess',
 ]
 
+disabledTests = [
+    [
+        ['Configuration/src/AspDotNetCore/Simple', 'win2012']:
+        'Disabled due to lack of support for long file names on Windows 2012 slave'
+    ],
+    [
+        ['Security/src/AspDotNetCore/CloudFoundrySingleSignon', 'win2012']:
+        'Disabled due to lack of support for long file names on Windows 2012 slave'
+    ],
+]
+
 def jobForSample(def sample, def platform) {
     "steeltoe-samples-${sample.split('/').findAll { !(it in ['src']) }.collect { it.toLowerCase() }.join('-')}-${platform}"
 }
@@ -78,10 +89,6 @@ samplePaths.each { samplePath ->
     platforms.each { platform ->
         job(jobForSample(samplePath, platform)) {
             displayName(displayNameForSample(samplePath, platform))
-            if (samplePath == 'Configuration/src/AspDotNetCore/Simple' && platform == 'win2012') {
-                disabled()
-                description('Disabled due to lack of support for long file names on Windows 2012 slave')
-            }
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
@@ -119,6 +126,11 @@ samplePaths.each { samplePath ->
             }
             logRotator {
                 numToKeep(5)
+            }
+            disabledReason = disabledTests[[samplePath, platform]]
+            if (disabledReason) {
+                disabled()
+                description(disabledReason)
             }
         }
     }
