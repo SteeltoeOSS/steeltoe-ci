@@ -42,14 +42,10 @@ alertees = [
 ]
 
 disabledTests = [
-    [
-        ['Configuration/src/AspDotNetCore/Simple', 'win2012']:
-        'Disabled due to lack of support for long file names on Windows 2012 slave'
-    ],
-    [
-        ['Security/src/AspDotNetCore/CloudFoundrySingleSignon', 'win2012']:
-        'Disabled due to lack of support for long file names on Windows 2012 slave'
-    ],
+    ['Configuration/src/AspDotNetCore/Simple', 'win2012']:
+        'Disabled due to lack of support for long file names on Windows 2012 slave',
+    ['Security/src/AspDotNetCore/CloudFoundrySingleSignon', 'win2012']:
+        'Disabled due to lack of support for long file names on Windows 2012 slave',
 ]
 
 def jobForSample(def sample, def platform) {
