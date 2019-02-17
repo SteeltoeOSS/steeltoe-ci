@@ -17,6 +17,17 @@ samplePaths = [
     'Management/src/AspDotNetCore/CloudFoundry',
 ]
 
+scmPathTriggers = [
+    "behave.ini",
+    "ci/.*",
+    "config/.*",
+    "environment.py",
+    "pyenv.pkgs",
+    "pylib/.*",
+    "test-run.*",
+    "test-setup.*",
+]
+
 platforms = [
     'ubuntu1604',
     'win2012',
@@ -90,17 +101,7 @@ samplePaths.each { samplePath ->
                     }
                     configure { gitScm ->
                         gitScm / 'extensions' << 'hudson.plugins.git.extensions.impl.PathRestriction' {
-                            includedRegions([
-                                    "${samplePath}/.*",
-                                    "behave.ini",
-                                    "ci/.*",
-                                    "config/.*",
-                                    "environment.py",
-                                    "pyenv.pkgs",
-                                    "pylib/*",
-                                    "test-run.*",
-                                    "test-setup.*",
-                                    ].join('\n'))
+                            includedRegions((scmPathTriggers + "${samplePath}/.*").join('\n'))
                         }
                     }
                 }
