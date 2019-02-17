@@ -1,3 +1,4 @@
 *.swp
 build/
 /.gradle
+/.idea
