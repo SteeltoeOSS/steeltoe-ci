@@ -82,10 +82,6 @@ samplePaths.each { samplePath ->
                 disabled()
                 description('Disabled due to lack of support for long file names on Windows 2012 slave')
             }
-            if (samplePath == 'Security/src/AspDotNetCore/CloudFoundrySingleSignon' && platform == 'win2012') {
-                disabled()
-                description('Disabled due to inability to run UAA client on Windows 2012 slave')
-            }
             wrappers {
                 credentialsBinding {
                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
