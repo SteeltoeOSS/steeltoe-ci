@@ -63,10 +63,10 @@ def displayNameForSample(def sample, def platform) {
     sample = nodes[-1]
     switch (nodes[-2]) {
         case ~/.*NetCore$/:
-            dotnet = 'core'
+            dotnet = 'c'
             break
         case ~/.*Net4/:
-            dotnet = 'fw4'
+            dotnet = 'f'
             break
         default:
             dotnet = nodes[-2]
@@ -74,10 +74,10 @@ def displayNameForSample(def sample, def platform) {
     }
     switch (platform) {
         case ~/win.*/:
-            os = 'win'
+            os = 'w'
             break
         case ~/ubuntu.*/:
-            os = 'lin'
+            os = 'l'
             break
         default:
             os = platform
