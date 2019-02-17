@@ -19,6 +19,7 @@ scmPathTriggers = [
     "environment.py",
     "pyenv.pkgs",
     "pylib/.*",
+    "steps/.*",
     "test-run.*",
     "test-setup.*",
 ]
