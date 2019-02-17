@@ -1,20 +1,15 @@
-/**
+/*
  * Jenkins DSL for Steeltoe Samples
  */
 
-samplePaths = [
-    'Configuration/src/AspDotNetCore/CloudFoundry',
-    'Configuration/src/AspDotNetCore/Simple',
-    'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
-    'Connectors/src/AspDotNetCore/MySql',
-    'Connectors/src/AspDotNetCore/MySqlEFCore',
-    'Connectors/src/AspDotNetCore/MySqlEF6',
-    'Connectors/src/AspDotNetCore/PostgreSql',
-    'Connectors/src/AspDotNetCore/PostgreEFCore',
-    'Connectors/src/AspDotNetCore/RabbitMQ',
-    'Connectors/src/AspDotNetCore/Redis',
-    'Security/src/AspDotNetCore/CloudFoundrySingleSignon',
-    'Management/src/AspDotNetCore/CloudFoundry',
+// configuration
+
+alertees = [
+    'ccheetham',
+    'dtillman',
+    'jkonicki',
+    'hsarella',
+    'thess',
 ]
 
 scmPathTriggers = [
@@ -33,20 +28,29 @@ platforms = [
     'win2012',
 ]
 
-alertees = [
-    'ccheetham',
-    'dtillman',
-    'jkonicki',
-    'hsarella',
-    'thess',
+samplePaths = [
+    'Configuration/src/AspDotNetCore/CloudFoundry',
+    'Configuration/src/AspDotNetCore/Simple',
+    'Configuration/src/AspDotNetCore/SimpleCloudFoundry',
+    'Connectors/src/AspDotNetCore/MySql',
+    'Connectors/src/AspDotNetCore/MySqlEFCore',
+    'Connectors/src/AspDotNetCore/MySqlEF6',
+    'Connectors/src/AspDotNetCore/PostgreSql',
+    'Connectors/src/AspDotNetCore/PostgreEFCore',
+    'Connectors/src/AspDotNetCore/RabbitMQ',
+    'Connectors/src/AspDotNetCore/Redis',
+    'Security/src/AspDotNetCore/CloudFoundrySingleSignon',
+    'Management/src/AspDotNetCore/CloudFoundry',
 ]
 
-disabledTests = [
+disabledSamples = [
     ['Configuration/src/AspDotNetCore/Simple', 'win2012']:
         'Disabled due to lack of support for long file names on Windows 2012 slave',
     ['Security/src/AspDotNetCore/CloudFoundrySingleSignon', 'win2012']:
         'Disabled due to lack of support for long file names on Windows 2012 slave',
 ]
+
+// utils
 
 def jobForSample(def sample, def platform) {
     "steeltoe-samples-${sample.split('/').findAll { !(it in ['src']) }.collect { it.toLowerCase() }.join('-')}-${platform}"
@@ -80,6 +84,8 @@ def displayNameForSample(def sample, def platform) {
     }
     "Steeltoe Sample ${library}:${sample} (${dotnet} on ${os})"
 }
+
+// jobs
 
 samplePaths.each { samplePath ->
     platforms.each { platform ->
@@ -123,7 +129,7 @@ samplePaths.each { samplePath ->
             logRotator {
                 numToKeep(5)
             }
-            disabledReason = disabledTests[[samplePath, platform]]
+            disabledReason = disabledSamples[[samplePath, platform]]
             if (disabledReason) {
                 disabled()
                 description(disabledReason)
@@ -131,5 +137,3 @@ samplePaths.each { samplePath ->
         }
     }
 }
-
-// vim: et sw=4 sts=4
