@@ -34,7 +34,7 @@ nestedView('Steeltoe') {
             }
             columns defaultColumns()
         }
-        listView('Steeltoe Jenkins Seed') {
+        listView('Steeltoe Seed') {
             jobs {
                 regex(/^steeltoe-seed$/)
             }
