@@ -42,8 +42,9 @@ dependencies {
     testCompile 'org.jenkins-ci.plugins:structs:1.6@jar'
 
     // plugins to install in test instance
-    testPlugins 'org.jenkins-ci.plugins:ghprb:1.31.4'
-    testPlugins 'com.coravy.hudson.plugins.github:github:1.19.0'
+    testPlugins "org.jenkins-ci.plugins:ghprb:${gitHubPullRequestPluginVersion}"
+    testPlugins "org.jenkins-ci.plugins:nested-view:${nestedViewPluginVersion}"
+    testPlugins "com.coravy.hudson.plugins.github:github:${gitHubPluginVersion}"
 }
 
 task resolveTestPlugins(type: Copy) {

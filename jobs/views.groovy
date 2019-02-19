@@ -1,12 +1,50 @@
-/**
- * Jenkins DSL for Steeltoe view.
+/*
+ * Jenkins DSL for Steeltoe views.
  */
 
-listView('Steeltoe') {
-    jobs {
-        regex(/^steeltoe-.+/)
+nestedView('Steeltoe') {
+    views {
+        listView('Steeltoe Samples') {
+            jobs {
+                regex(/^steeltoe-samples-.+/)
+            }
+            columns defaultColumns()
+        }
+        listView('Steeltoe Samples: Configuration') {
+            jobs {
+                regex(/^steeltoe-samples-configuration-.+/)
+            }
+            columns defaultColumns()
+        }
+        listView('Steeltoe Samples: Connectors') {
+            jobs {
+                regex(/^steeltoe-samples-connectors-.+/)
+            }
+            columns defaultColumns()
+        }
+        listView('Steeltoe Samples: Management') {
+            jobs {
+                regex(/^steeltoe-samples-management-.+/)
+            }
+            columns defaultColumns()
+        }
+        listView('Steeltoe Samples: Security') {
+            jobs {
+                regex(/^steeltoe-samples-security-.+/)
+            }
+            columns defaultColumns()
+        }
+        listView('Steeltoe Jenkins Seed') {
+            jobs {
+                regex(/^steeltoe-seed$/)
+            }
+            columns defaultColumns()
+        }
     }
-    columns {
+}
+
+private Closure defaultColumns() {
+    return {
         weather()
         status()
         name()
