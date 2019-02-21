@@ -1,4 +1,3 @@
-return
 
 If ($env:APPVEYOR_REPO_BRANCH -ne "dev" -and $env:APPVEYOR_REPO_BRANCH -ne "master")
 {
