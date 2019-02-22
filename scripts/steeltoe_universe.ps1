@@ -57,6 +57,7 @@ $TotalTime.Start()
 # setup a local folder NuGet feed for use during the build
 mkdir artifacts -Force
 nuget sources add -Name artifacts -Source "$(Get-Location)\artifacts"
+nuget sources add -Name SteeltoeStaging -Source https://www.myget.org/F/steeltoestaging/api/v3/index.json
 
 # ensure the workspace is clean
 Remove-Item workspace -Force -Recurse -ErrorAction SilentlyContinue
