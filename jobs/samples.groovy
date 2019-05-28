@@ -134,6 +134,8 @@ samplePaths.each { samplePath ->
             if (disabledReason) {
                 disabled()
                 description(disabledReason)
+            } else {
+                disabled()
             }
         }
     }
