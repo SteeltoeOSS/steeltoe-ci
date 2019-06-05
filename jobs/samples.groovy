@@ -88,55 +88,55 @@ def displayNameForSample(def sample, def platform) {
 
 // jobs
 
-samplePaths.each { samplePath ->
-    platforms.each { platform ->
-        job(jobForSample(samplePath, platform)) {
-            displayName(displayNameForSample(samplePath, platform))
-            wrappers {
-                credentialsBinding {
-                    usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
-                }
-                preBuildCleanup()
-            }
-            label("steeltoe && ${platform}")
-            scm {
-                git {
-                    remote {
-                        github('SteeltoeOSS/Samples', 'https')
-                        branch('dev')
-                    }
-                    configure { gitScm ->
-                        gitScm / 'extensions' << 'hudson.plugins.git.extensions.impl.PathRestriction' {
-                            includedRegions((scmPathTriggers + "${samplePath}/.*").join('\n'))
-                        }
-                    }
-                }
-            }
-            triggers {
-                scm('H/15 * * * *')
-            }
-            steps {
-                if (platform.startsWith('win')) {
-                    batchFile("ci\\jenkins.cmd ${samplePath.replaceAll('/', '\\\\')}")
-                } else {
-                    shell("ci/jenkins.sh ${samplePath}")
-                }
-            }
-            publishers {
-                archiveArtifacts('test.log')
-                archiveJunit('test.out/reports/*.xml')
-                mailer(alertees.collect { "${it}@pivotal.io" }.join(' '), true, false)
-            }
-            logRotator {
-                numToKeep(5)
-            }
-            disabledReason = disabledSamples[[samplePath, platform]]
-            if (disabledReason) {
-                disabled()
-                description(disabledReason)
-            } else {
-                disabled()
-            }
-        }
-    }
-}
+// samplePaths.each { samplePath ->
+//     platforms.each { platform ->
+//         job(jobForSample(samplePath, platform)) {
+//             displayName(displayNameForSample(samplePath, platform))
+//             wrappers {
+//                 credentialsBinding {
+//                     usernamePassword('STEELTOE_PCF_CREDENTIALS', 'steeltoe-pcf')
+//                 }
+//                 preBuildCleanup()
+//             }
+//             label("steeltoe && ${platform}")
+//             scm {
+//                 git {
+//                     remote {
+//                         github('SteeltoeOSS/Samples', 'https')
+//                         branch('dev')
+//                     }
+//                     configure { gitScm ->
+//                         gitScm / 'extensions' << 'hudson.plugins.git.extensions.impl.PathRestriction' {
+//                             includedRegions((scmPathTriggers + "${samplePath}/.*").join('\n'))
+//                         }
+//                     }
+//                 }
+//             }
+//             triggers {
+//                 scm('H/15 * * * *')
+//             }
+//             steps {
+//                 if (platform.startsWith('win')) {
+//                     batchFile("ci\\jenkins.cmd ${samplePath.replaceAll('/', '\\\\')}")
+//                 } else {
+//                     shell("ci/jenkins.sh ${samplePath}")
+//                 }
+//             }
+//             publishers {
+//                 archiveArtifacts('test.log')
+//                 archiveJunit('test.out/reports/*.xml')
+//                 mailer(alertees.collect { "${it}@pivotal.io" }.join(' '), true, false)
+//             }
+//             logRotator {
+//                 numToKeep(5)
+//             }
+//             disabledReason = disabledSamples[[samplePath, platform]]
+//             if (disabledReason) {
+//                 disabled()
+//                 description(disabledReason)
+//             } else {
+//                 disabled()
+//             }
+//         }
+//     }
+// }
